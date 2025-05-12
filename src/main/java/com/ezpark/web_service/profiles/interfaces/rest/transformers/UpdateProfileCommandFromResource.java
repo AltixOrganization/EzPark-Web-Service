@@ -1,0 +1,10 @@
+package com.ezpark.web_service.profiles.interfaces.rest.transformers;
+
+import com.ezpark.web_service.profiles.domain.model.commands.UpdateProfileCommand;
+import com.ezpark.web_service.profiles.interfaces.rest.resources.UpdateProfileResource;
+
+public class UpdateProfileCommandFromResource {
+    public static UpdateProfileCommand toCommandFromResource(Long userId, UpdateProfileResource resource) {
+        return new UpdateProfileCommand(userId, resource.name(), resource.lastName(), resource.address());
+    }
+}
