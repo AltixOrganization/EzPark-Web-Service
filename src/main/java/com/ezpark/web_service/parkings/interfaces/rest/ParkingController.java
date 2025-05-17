@@ -6,6 +6,7 @@ import com.ezpark.web_service.parkings.domain.model.queries.GetAllParkingQuery;
 import com.ezpark.web_service.parkings.domain.model.queries.GetParkingByIdQuery;
 import com.ezpark.web_service.parkings.domain.model.queries.GetParkingListByProfileId;
 import com.ezpark.web_service.parkings.domain.model.queries.GetParkingsByNearLatLngQuery;
+import com.ezpark.web_service.parkings.domain.model.valueobjects.ProfileId;
 import com.ezpark.web_service.parkings.domain.services.ParkingCommandService;
 import com.ezpark.web_service.parkings.domain.services.ParkingQueryService;
 import com.ezpark.web_service.parkings.interfaces.rest.resources.CreateParkingResource;
@@ -82,7 +83,8 @@ public class ParkingController {
 
     @GetMapping("/profile/{id}")
     public ResponseEntity<List<ParkingResource>> getParkingListByProfileId(@PathVariable Long id) {
-        GetParkingListByProfileId query = new GetParkingListByProfileId(id);
+        var profileId = new ProfileId(id);
+        GetParkingListByProfileId query = new GetParkingListByProfileId(profileId);
         List<Parking> parkingList = parkingQueryService.handle(query);
 
         var resources = parkingList.stream()
