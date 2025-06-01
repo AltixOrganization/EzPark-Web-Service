@@ -6,6 +6,7 @@ import com.ezpark.web_service.iam.application.internal.outboundservices.tokens.T
 import com.ezpark.web_service.iam.domain.model.aggregates.User;
 import com.ezpark.web_service.iam.domain.model.commands.SignInCommand;
 import com.ezpark.web_service.iam.domain.model.commands.SignUpCommand;
+import com.ezpark.web_service.iam.domain.model.exceptions.*;
 import com.ezpark.web_service.iam.domain.model.exceptions.EmailAlreadyExistsException;
 import com.ezpark.web_service.iam.domain.model.exceptions.InvalidCredentialsException;
 import com.ezpark.web_service.iam.domain.model.exceptions.RoleNotFoundException;

@@ -1,7 +1,7 @@
-package com.ezpark.web_service.iam.interfaces.rest;
+package com.ezpark.web_service.vehicles.interfaces.rest;
 
-import com.ezpark.web_service.iam.domain.model.exceptions.*;
 import com.ezpark.web_service.shared.interfaces.rest.resources.ErrorResource;
+import com.ezpark.web_service.vehicles.domain.model.exceptions.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindingResult;
@@ -13,56 +13,46 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static com.ezpark.web_service.iam.infrastructure.utils.IamErrorCatalog.*;
+import static com.ezpark.web_service.vehicles.infrastructure.utils.VehicleErrorCatalog.*;
 
-@RestControllerAdvice(basePackages = "com.ezpark.web_service.iam")
-public class IamControllerAdvice {
+@RestControllerAdvice(basePackages = "com.ezpark.web_service.vehicles")
+public class VehicleControllerAdvice {
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(UserNotFoundException.class)
-    public ErrorResource handleUserNotFoundException() {
+    @ExceptionHandler(VehicleNotFoundException.class)
+    public ErrorResource handleVehicleNotFoundException() {
         ErrorResource response = new ErrorResource();
-        response.setCode(USER_NOT_FOUND.getCode());
-        response.setMessage(USER_NOT_FOUND.getMessage());
+        response.setCode(VEHICLE_NOT_FOUND.getCode());
+        response.setMessage(VEHICLE_NOT_FOUND.getMessage());
         response.setTimeStamp(LocalDateTime.now());
         return response;
     }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(RoleNotFoundException.class)
-    public ErrorResource handleRoleNotFoundException() {
+    @ExceptionHandler(ProfileNotFoundException.class)
+    public ErrorResource handleProfileNotFoundException() {
         ErrorResource response = new ErrorResource();
-        response.setCode(ROLE_NOT_FOUND.getCode());
-        response.setMessage(ROLE_NOT_FOUND.getMessage());
-        response.setTimeStamp(LocalDateTime.now());
-        return response;
-    }
-
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    @ExceptionHandler(InvalidCredentialsException.class)
-    public ErrorResource handleInvalidCredentialsException() {
-        ErrorResource response = new ErrorResource();
-        response.setCode(INVALID_CREDENTIALS.getCode());
-        response.setMessage(INVALID_CREDENTIALS.getMessage());
+        response.setCode(PROFILE_NOT_FOUND.getCode());
+        response.setMessage(PROFILE_NOT_FOUND.getMessage());
         response.setTimeStamp(LocalDateTime.now());
         return response;
     }
 
     @ResponseStatus(HttpStatus.CONFLICT)
-    @ExceptionHandler(UsernameAlreadyExistsException.class)
-    public ErrorResource handleUsernameAlreadyExistsException() {
+    @ExceptionHandler(VehicleLicensePlateConflictException.class)
+    public ErrorResource handleVehicleLicensePlateConflictException() {
         ErrorResource response = new ErrorResource();
-        response.setCode(USERNAME_ALREADY_EXISTS.getCode());
-        response.setMessage(USERNAME_ALREADY_EXISTS.getMessage());
+        response.setCode(LICENSE_PLATE_CONFLICT.getCode());
+        response.setMessage(LICENSE_PLATE_CONFLICT.getMessage());
         response.setTimeStamp(LocalDateTime.now());
         return response;
     }
 
-    @ResponseStatus(HttpStatus.CONFLICT)
-    @ExceptionHandler(EmailAlreadyExistsException.class)
-    public ErrorResource handleEmailAlreadyExistsException() {
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    @ExceptionHandler(VehicleUpdateException.class)
+    public ErrorResource handleVehicleUpdateException() {
         ErrorResource response = new ErrorResource();
-        response.setCode(EMAIL_ALREADY_EXISTS.getCode());
-        response.setMessage(EMAIL_ALREADY_EXISTS.getMessage());
+        response.setCode(VEHICLE_UPDATE_ERROR.getCode());
+        response.setMessage(VEHICLE_UPDATE_ERROR.getMessage());
         response.setTimeStamp(LocalDateTime.now());
         return response;
     }
@@ -96,6 +86,9 @@ public class IamControllerAdvice {
         return response;
     }
 
+
+
+    // generic errors
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
     public ErrorResource handleGenericException(Exception exception) {
