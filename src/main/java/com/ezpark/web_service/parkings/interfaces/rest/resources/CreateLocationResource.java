@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public record UpdateLocationResource(
+public record CreateLocationResource(
         @NotBlank(message = "{location.address.not.blank}")
         String address,
 

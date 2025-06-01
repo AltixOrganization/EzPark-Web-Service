@@ -5,6 +5,15 @@ import com.ezpark.web_service.parkings.interfaces.rest.resources.UpdateLocationR
 
 public class UpdateLocationCommandFromResourceAssembler {
     public static UpdateLocationCommand toCommandFromResource(Long id, UpdateLocationResource resource) {
-        return new UpdateLocationCommand(id, resource.address(), resource.numDirection(), resource.street(), resource.district(), resource.city(), resource.latitude(), resource.longitude());
+        return new UpdateLocationCommand(
+                id,
+                resource.address(),
+                resource.numDirection(),
+                resource.street(),
+                resource.district(),
+                resource.city(),
+                resource.latitude(),
+                resource.longitude()
+        );
     }
 }

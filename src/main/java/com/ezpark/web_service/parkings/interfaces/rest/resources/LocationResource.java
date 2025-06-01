@@ -1,5 +1,7 @@
 package com.ezpark.web_service.parkings.interfaces.rest.resources;
 
+import java.time.LocalDateTime;
+
 public record LocationResource(
         Long id,
         Long parkingId,
@@ -9,5 +11,7 @@ public record LocationResource(
         String district,
         String city,
         Double latitude,
-        Double longitude
+        Double longitude,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
 ) {}
