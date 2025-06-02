@@ -10,8 +10,15 @@ public class SignUpCommandFromResourceAssembler {
 
   public static SignUpCommand toCommandFromResource(SignUpResource resource) {
     var roles = resource.roles() != null
-        ? resource.roles().stream().map(Role::toRoleFromName).toList()
-        : new ArrayList<Role>();
-    return new SignUpCommand(resource.email(), resource.username(), resource.password(), roles);
+            ? resource.roles().stream().map(Role::toRoleFromName).toList()
+            : new ArrayList<Role>();
+    return new SignUpCommand(
+            resource.firstName(),
+            resource.lastName(),
+            resource.birthDate(),
+            resource.email(),
+            resource.password(),
+            roles
+    );
   }
 }

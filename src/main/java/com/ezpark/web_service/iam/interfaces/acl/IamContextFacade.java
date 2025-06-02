@@ -1,7 +1,5 @@
 package com.ezpark.web_service.iam.interfaces.acl;
 
-import java.util.List;
-
 /**
  * IamContextFacade
  * <p>
@@ -13,36 +11,14 @@ import java.util.List;
  */
 public interface IamContextFacade {
   /**
-   * createUser
-   * <p>
-   *     This method is used to create a user in the IAM context.
-   * </p>
-   * @param username the username of the user
-   * @param password the password of the user
-   * @return the userId of the created user
-   */
-  Long createUser(String email, String username, String password);
-  /**
-   * createUser
-   * <p>
-   *     This method is used to create a user in the IAM context.
-   * </p>
-   * @param username the username of the user
-   * @param password the password of the user
-   * @param roleNames the list of role names of the user
-   * @return the userId of the created user
-   */
-  Long createUser(String email, String username, String password, List<String> roleNames);
-
-  /**
    * fetchUserIdByUsername
    * <p>
    *     This method is used to fetch the userId by username.
    * </p>
-   * @param username the username of the user
+   * @param email the username of the user
    * @return the user id of the user if found, 0L otherwise
    */
-  Long fetchUserIdByUsername(String username);
+  Long fetchUserIdByEmail(String email);
 
   /**
    * fetchUsernameByUserId
@@ -52,7 +28,7 @@ public interface IamContextFacade {
    * @param userId the userId of the user
    * @return the username of the user if found, empty string otherwise
    */
-  String fetchUsernameByUserId(Long userId);
+  String fetchEmailByUserId(Long userId);
 
   Boolean checkProfileExistsByUserId(Long userId);
 }

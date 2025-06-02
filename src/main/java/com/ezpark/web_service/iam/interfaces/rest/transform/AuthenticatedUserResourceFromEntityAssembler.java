@@ -6,6 +6,6 @@ import com.ezpark.web_service.iam.interfaces.rest.resources.AuthenticatedUserRes
 public class AuthenticatedUserResourceFromEntityAssembler {
 
   public static AuthenticatedUserResource toResourceFromEntity(User user, String token) {
-    return new AuthenticatedUserResource(user.getId(), user.getUsername(), token);
+    return new AuthenticatedUserResource(user.getId(), user.getEmail(), token);
   }
 }

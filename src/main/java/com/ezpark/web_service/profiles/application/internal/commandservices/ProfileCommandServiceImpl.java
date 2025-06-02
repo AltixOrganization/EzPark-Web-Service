@@ -6,8 +6,10 @@ import com.ezpark.web_service.profiles.domain.model.aggregates.Profile;
 import com.ezpark.web_service.profiles.domain.model.commands.CreateProfileCommand;
 import com.ezpark.web_service.profiles.domain.model.commands.DeleteProfileCommand;
 import com.ezpark.web_service.profiles.domain.model.commands.UpdateProfileCommand;
+import com.ezpark.web_service.profiles.domain.model.exceptions.*;
 import com.ezpark.web_service.profiles.domain.services.ProfileCommandService;
 import com.ezpark.web_service.profiles.infrastructure.repositories.jpa.ProfileRepository;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -18,7 +20,7 @@ public class ProfileCommandServiceImpl implements ProfileCommandService {
     private final ProfileRepository profileRepository;
     private final ExternalUserService externalUserService;
 
-    public ProfileCommandServiceImpl(ProfileRepository profileRepository, ExternalUserService externalUserService) {
+    public ProfileCommandServiceImpl(ProfileRepository profileRepository, @Lazy ExternalUserService externalUserService) {
         this.profileRepository = profileRepository;
         this.externalUserService = externalUserService;
     }
@@ -28,7 +30,7 @@ public class ProfileCommandServiceImpl implements ProfileCommandService {
     public Optional<Profile> handle(CreateProfileCommand command) {
         if(!externalUserService.checkUserExistsByUserId(command.userId()))
         {
-            throw new IllegalArgumentException("User with ID " + command.userId() + " does not exist.");
+            throw new UserNotFoundException();
         }
         Profile user = new Profile(command);
         try {
@@ -45,19 +47,19 @@ public class ProfileCommandServiceImpl implements ProfileCommandService {
     public Optional<Profile> handle(UpdateProfileCommand command) {
         var result = profileRepository.findById(command.profileId());
         if (result.isEmpty())
-            throw new IllegalArgumentException("User does not exist");
+            throw new ProfileNotFoundException();
         var userToUpdate = result.get();
         try{
             var updatedUser= profileRepository.save(userToUpdate.updatedProfile(command));
             return Optional.of(updatedUser);
         }catch (Exception e){
-            throw new IllegalArgumentException("Error while updating user: " + e.getMessage());
+            throw new ProfileUpdateException();
         }
     }
 
     @Override
     public void handle(DeleteProfileCommand command){
-        if (!profileRepository.existsById(command.profileId())) throw new IllegalArgumentException("User does not exist");
+        if (!profileRepository.existsById(command.profileId())) throw new ProfileNotFoundException();
         profileRepository.deleteById(command.profileId());
         System.out.println("User Delete");
     }

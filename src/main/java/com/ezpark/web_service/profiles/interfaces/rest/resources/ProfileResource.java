@@ -1,10 +1,15 @@
 package com.ezpark.web_service.profiles.interfaces.rest.resources;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 public record ProfileResource(
         Long id,
-        String name,
+        String firstName,
         String lastName,
-        String address,
-        Long userId
+        LocalDate birthDate,
+        Long userId,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
 ) {
 }

@@ -6,6 +6,6 @@ import com.ezpark.web_service.profiles.interfaces.rest.resources.CreateProfileRe
 
 public class CreateProfileCommandFromResourceAssembler {
     public static CreateProfileCommand toCommandFromResource(CreateProfileResource resource) {
-        return new CreateProfileCommand(resource.name(), resource.lastName(), resource.address(), resource.userId());
+        return new CreateProfileCommand(resource.firstName(), resource.lastName(), resource.birthDate(), resource.userId());
     }
 }

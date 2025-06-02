@@ -46,44 +46,46 @@ public class TokenServiceImpl implements BearerTokenService {
    */
   @Override
   public String generateToken(Authentication authentication) {
-    return buildTokenWithDefaultParameters(authentication.getName());
+    Long userId = Long.parseLong(authentication.getName());
+    return buildTokenWithDefaultParameters(userId);
   }
 
   /**
    * This method generates a JWT token from a username
-   * @param username the username
+   * @param userId the userId
    * @return String the JWT token
    */
-  public String generateToken(String username) {
-    return buildTokenWithDefaultParameters(username);
+  public String generateToken(Long userId) {
+    return buildTokenWithDefaultParameters(userId);
   }
 
   /**
    * This method generates a JWT token from a username and a secret.
    * It uses the default expiration days from the application.properties file.
-   * @param username the username
+   * @param userId the userId
    * @return String the JWT token
    */
-  private String buildTokenWithDefaultParameters(String username) {
+  private String buildTokenWithDefaultParameters(Long userId) {
     var issuedAt = new Date();
     var expiration = DateUtils.addDays(issuedAt, expirationDays);
     var key = getSigningKey();
     return Jwts.builder()
-        .subject(username)
-        .issuedAt(issuedAt)
-        .expiration(expiration)
-        .signWith(key)
-        .compact();
+            .subject(userId.toString())
+            .issuedAt(issuedAt)
+            .expiration(expiration)
+            .signWith(key)
+            .compact();
   }
 
   /**
    * This method extracts the username from a JWT token
    * @param token the token
-   * @return String the username
+   * @return Long the userId extracted from the token
    */
   @Override
-  public String getUsernameFromToken(String token) {
-    return extractClaim(token, Claims::getSubject);
+  public Long getUserIdFromToken(String token) {
+    String subject = extractClaim(token, Claims::getSubject);
+    return Long.parseLong(subject);
   }
 
   /**
@@ -130,10 +132,10 @@ public class TokenServiceImpl implements BearerTokenService {
    */
   private Claims extractAllClaims(String token) {
     return Jwts.parser()
-        .verifyWith(getSigningKey())
-        .build()
-        .parseSignedClaims(token)
-        .getPayload();
+            .verifyWith(getSigningKey())
+            .build()
+            .parseSignedClaims(token)
+            .getPayload();
   }
 
   /**

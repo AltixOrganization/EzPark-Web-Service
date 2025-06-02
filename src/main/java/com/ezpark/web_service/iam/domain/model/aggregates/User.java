@@ -26,11 +26,6 @@ import java.util.Set;
 public class User extends AuditableAbstractAggregateRoot<User> {
 
   @NotBlank
-  @Size(max = 50)
-  @Column(unique = true)
-  private String username;
-
-  @NotBlank
   @Email
   @Column(unique = true)
   private String email;
@@ -48,15 +43,14 @@ public class User extends AuditableAbstractAggregateRoot<User> {
   public User() {
     this.roles = new HashSet<>();
   }
-  public User(String email, String username, String password) {
+  public User(String email, String password) {
     this.email = email;
-    this.username = username;
     this.password = password;
     this.roles = new HashSet<>();
   }
 
-  public User(String email, String username, String password, List<Role> roles) {
-    this(email, username, password);
+  public User(String email, String password, List<Role> roles) {
+    this(email, password);
     addRoles(roles);
   }
 

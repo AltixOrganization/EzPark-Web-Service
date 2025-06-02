@@ -1,4 +1,4 @@
 package com.ezpark.web_service.iam.domain.model.queries;
 
-public record GetUserByUsernameQuery(String username) {
+public record GetUserByEmailQuery(String email) {
 }

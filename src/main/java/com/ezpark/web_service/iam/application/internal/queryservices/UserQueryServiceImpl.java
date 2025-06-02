@@ -3,7 +3,7 @@ package com.ezpark.web_service.iam.application.internal.queryservices;
 import com.ezpark.web_service.iam.domain.model.aggregates.User;
 import com.ezpark.web_service.iam.domain.model.queries.GetAllUsersQuery;
 import com.ezpark.web_service.iam.domain.model.queries.GetUserByIdQuery;
-import com.ezpark.web_service.iam.domain.model.queries.GetUserByUsernameQuery;
+import com.ezpark.web_service.iam.domain.model.queries.GetUserByEmailQuery;
 import com.ezpark.web_service.iam.domain.services.UserQueryService;
 import com.ezpark.web_service.iam.infrastructure.persistence.jpa.repositories.UserRepository;
 import org.springframework.stereotype.Service;
@@ -50,13 +50,13 @@ public class UserQueryServiceImpl implements UserQueryService {
   }
 
   /**
-   * This method is used to handle {@link GetUserByUsernameQuery} query.
-   * @param query {@link GetUserByUsernameQuery} instance.
+   * This method is used to handle {@link GetUserByEmailQuery} query.
+   * @param query {@link GetUserByEmailQuery} instance.
    * @return {@link Optional} of {@link User} instance.
-   * @see GetUserByUsernameQuery
+   * @see GetUserByEmailQuery
    */
   @Override
-  public Optional<User> handle(GetUserByUsernameQuery query) {
-    return userRepository.findByUsername(query.username());
+  public Optional<User> handle(GetUserByEmailQuery query) {
+    return userRepository.findByEmail(query.email());
   }
 }

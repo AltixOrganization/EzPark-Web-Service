@@ -48,18 +48,18 @@ public class AuthenticationController {
    */
   @PostMapping("/sign-in")
   public ResponseEntity<AuthenticatedUserResource> signIn(
-      @RequestBody SignInResource signInResource) {
+          @Valid @RequestBody SignInResource signInResource) {
 
     var signInCommand = SignInCommandFromResourceAssembler
-        .toCommandFromResource(signInResource);
+            .toCommandFromResource(signInResource);
     var authenticatedUser = userCommandService.handle(signInCommand);
     if (authenticatedUser.isEmpty()) {
       return ResponseEntity.notFound().build();
     }
 
     var authenticatedUserResource = AuthenticatedUserResourceFromEntityAssembler
-        .toResourceFromEntity(
-            authenticatedUser.get().getLeft(), authenticatedUser.get().getRight());
+            .toResourceFromEntity(
+                    authenticatedUser.get().getLeft(), authenticatedUser.get().getRight());
     return ResponseEntity.ok(authenticatedUserResource);
   }
 
@@ -71,7 +71,7 @@ public class AuthenticationController {
   @PostMapping("/sign-up")
   public ResponseEntity<UserResource> signUp(@Valid @RequestBody SignUpResource signUpResource) {
     var signUpCommand = SignUpCommandFromResourceAssembler
-        .toCommandFromResource(signUpResource);
+            .toCommandFromResource(signUpResource);
     System.out.println(signUpCommand.roles());
     var user = userCommandService.handle(signUpCommand);
     if (user.isEmpty()) {

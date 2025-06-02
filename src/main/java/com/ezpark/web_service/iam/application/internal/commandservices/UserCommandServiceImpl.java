@@ -1,19 +1,26 @@
 package com.ezpark.web_service.iam.application.internal.commandservices;
 
+import com.ezpark.web_service.iam.application.internal.outboundservices.acl.ExternalProfileService;
 import com.ezpark.web_service.iam.application.internal.outboundservices.hashing.HashingService;
 import com.ezpark.web_service.iam.application.internal.outboundservices.tokens.TokenService;
 import com.ezpark.web_service.iam.domain.model.aggregates.User;
 import com.ezpark.web_service.iam.domain.model.commands.SignInCommand;
 import com.ezpark.web_service.iam.domain.model.commands.SignUpCommand;
+import com.ezpark.web_service.iam.domain.model.exceptions.EmailAlreadyExistsException;
+import com.ezpark.web_service.iam.domain.model.exceptions.InvalidCredentialsException;
+import com.ezpark.web_service.iam.domain.model.exceptions.RoleNotFoundException;
 import com.ezpark.web_service.iam.domain.model.valueobjects.Roles;
 import com.ezpark.web_service.iam.domain.services.UserCommandService;
 import com.ezpark.web_service.iam.infrastructure.persistence.jpa.repositories.RoleRepository;
 import com.ezpark.web_service.iam.infrastructure.persistence.jpa.repositories.UserRepository;
+import com.ezpark.web_service.profiles.domain.model.exceptions.UserNotFoundException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * User command service implementation
@@ -30,14 +37,16 @@ public class UserCommandServiceImpl implements UserCommandService {
   private final TokenService tokenService;
 
   private final RoleRepository roleRepository;
+  private final ExternalProfileService externalProfileService;
 
   public UserCommandServiceImpl(UserRepository userRepository, HashingService hashingService,
-      TokenService tokenService, RoleRepository roleRepository) {
+                                TokenService tokenService, RoleRepository roleRepository, ExternalProfileService externalProfileService) {
 
     this.userRepository = userRepository;
     this.hashingService = hashingService;
     this.tokenService = tokenService;
     this.roleRepository = roleRepository;
+    this.externalProfileService = externalProfileService;
   }
 
   /**
@@ -51,13 +60,13 @@ public class UserCommandServiceImpl implements UserCommandService {
    */
   @Override
   public Optional<ImmutablePair<User, String>> handle(SignInCommand command) {
-    var user = userRepository.findByUsername(command.username());
+    var user = userRepository.findByEmail(command.email());
     if (user.isEmpty())
-      throw new RuntimeException("User not found");
+      throw new UserNotFoundException();
     if (!hashingService.matches(command.password(), user.get().getPassword()))
-      throw new RuntimeException("Invalid password");
+      throw new InvalidCredentialsException();
 
-    var token = tokenService.generateToken(user.get().getUsername());
+    var token = tokenService.generateToken(user.get().getId());
     return Optional.of(ImmutablePair.of(user.get(), token));
   }
 
@@ -69,23 +78,23 @@ public class UserCommandServiceImpl implements UserCommandService {
    * @param command the sign-up command containing the username and password
    * @return the created user
    */
+  @Transactional
   @Override
   public Optional<User> handle(SignUpCommand command) {
-    if (userRepository.existsByUsername(command.username()))
-      throw new RuntimeException("Username already exists");
     if (userRepository.existsByEmail(command.email()))
-      throw new RuntimeException("Email already exists");
+      throw new EmailAlreadyExistsException();
     var roles = command.roles().stream()
-        .map(role ->
-            roleRepository.findByName(role.getName())
-                .orElseThrow(() -> new RuntimeException("Role name not found")))
-        .toList();
+            .map(role ->
+                    roleRepository.findByName(role.getName())
+                            .orElseThrow(RoleNotFoundException::new))
+            .toList();
     if (roles.isEmpty()) {
       roles = List.of(roleRepository.findByName(Roles.ROLE_GUEST)
-              .orElseThrow(() -> new RuntimeException("Default role not found")));
+              .orElseThrow(RoleNotFoundException::new));
     }
-    var user = new User(command.email(), command.username(), hashingService.encode(command.password()), roles);
-    userRepository.save(user);
-    return userRepository.findByUsername(command.username());
+    var user = new User(command.email(), hashingService.encode(command.password()), roles);
+    var savedUser = userRepository.save(user);
+    externalProfileService.createProfile(savedUser.getId(), command.firstName(), command.lastName(), command.birthDate());
+    return userRepository.findByEmail(command.email());
   }
 }

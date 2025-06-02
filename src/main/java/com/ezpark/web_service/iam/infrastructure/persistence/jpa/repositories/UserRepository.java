@@ -14,19 +14,11 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long>
 {
   /**
-   * This method is responsible for finding the user by username.
-   * @param username The username.
+   * This method is responsible for finding the user by email.
+   * @param email The email.
    * @return The user object.
    */
-  Optional<User> findByUsername(String username);
-
-  /**
-   * This method is responsible for checking if the user exists by username.
-   * @param username The username.
-   * @return True if the user exists, false otherwise.
-   */
-  boolean existsByUsername(String username);
-
+  Optional<User> findByEmail(String email);
   /**
    * This method is responsible for checking if the user exists by email.
    * @param email  The username.

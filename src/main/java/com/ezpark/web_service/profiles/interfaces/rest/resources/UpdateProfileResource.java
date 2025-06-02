@@ -1,11 +1,21 @@
 package com.ezpark.web_service.profiles.interfaces.rest.resources;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Size;
+
+import java.time.LocalDate;
+
 public record UpdateProfileResource(
-        String name,
+        @NotBlank(message = "{profile.firstName.not.blank}")
+        @Size(max = 200, message = "{profile.firstName.size}")
+        String firstName,
+
+        @NotBlank(message = "{profile.lastName.not.blank}")
+        @Size(max = 200, message = "{profile.lastName.size}")
         String lastName,
-        String address,
-        String email,
-        String idCardType,
-        String idCardNumber
+
+        @Past(message = "{profile.birthDate.past}")
+        LocalDate birthDate
 ) {
 }

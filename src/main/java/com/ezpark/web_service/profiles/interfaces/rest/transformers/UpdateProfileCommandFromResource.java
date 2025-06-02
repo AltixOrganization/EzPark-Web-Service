@@ -5,6 +5,6 @@ import com.ezpark.web_service.profiles.interfaces.rest.resources.UpdateProfileRe
 
 public class UpdateProfileCommandFromResource {
     public static UpdateProfileCommand toCommandFromResource(Long userId, UpdateProfileResource resource) {
-        return new UpdateProfileCommand(userId, resource.name(), resource.lastName(), resource.address());
+        return new UpdateProfileCommand(userId, resource.firstName(), resource.lastName(), resource.birthDate());
     }
 }

@@ -1,7 +1,5 @@
 package com.ezpark.web_service.profiles.interfaces.rest;
 
-
-
 import com.ezpark.web_service.profiles.domain.model.commands.DeleteProfileCommand;
 import com.ezpark.web_service.profiles.domain.model.queries.GetAllProfilesQuery;
 import com.ezpark.web_service.profiles.domain.model.queries.GetProfileByIdQuery;
@@ -13,6 +11,7 @@ import com.ezpark.web_service.profiles.interfaces.rest.resources.UpdateProfileRe
 import com.ezpark.web_service.profiles.interfaces.rest.transformers.CreateProfileCommandFromResourceAssembler;
 import com.ezpark.web_service.profiles.interfaces.rest.transformers.ProfileResourceFromEntityAssembler;
 import com.ezpark.web_service.profiles.interfaces.rest.transformers.UpdateProfileCommandFromResource;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -50,7 +49,7 @@ public class ProfileController {
     }
 
     @PostMapping
-    public ResponseEntity<ProfileResource> createProfile(@RequestBody CreateProfileResource createProfileResource) {
+    public ResponseEntity<ProfileResource> createProfile(@Valid @RequestBody CreateProfileResource createProfileResource) {
         var createProfileCommand = CreateProfileCommandFromResourceAssembler.toCommandFromResource(createProfileResource);
 
         var profile = profileCommandService.handle(createProfileCommand).map(ProfileResourceFromEntityAssembler::toResourceFromEntity);
@@ -59,7 +58,7 @@ public class ProfileController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProfileResource> updateProfile(@PathVariable Long id, @RequestBody UpdateProfileResource updateProfileResource) {
+    public ResponseEntity<ProfileResource> updateProfile(@Valid@PathVariable Long id, @RequestBody UpdateProfileResource updateProfileResource) {
         var updateProfileCommand = UpdateProfileCommandFromResource.toCommandFromResource(id, updateProfileResource);
         var updatedProfile = profileCommandService.handle(updateProfileCommand).map(ProfileResourceFromEntityAssembler::toResourceFromEntity);
         return updatedProfile.map(r -> new ResponseEntity<>(r, HttpStatus.OK))

@@ -7,18 +7,18 @@ package com.ezpark.web_service.iam.application.internal.outboundservices.tokens;
 public interface TokenService {
 
   /**
-   * Generate a token for a given username
-   * @param username the username
+   * Generate a token for a given userId
+   * @param userId the userId
    * @return String the token
    */
-  String generateToken(String username);
+  String generateToken(Long userId);
 
   /**
    * Extract the username from a token
    * @param token the token
    * @return String the username
    */
-  String getUsernameFromToken(String token);
+  Long getUserIdFromToken(String token);
 
   /**
    * Validate a token
