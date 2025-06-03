@@ -6,7 +6,7 @@ import com.ezpark.web_service.reservations.domain.model.valueobject.GuestId;
 import com.ezpark.web_service.reservations.domain.model.valueobject.HostId;
 import com.ezpark.web_service.reservations.domain.model.valueobject.Status;
 import com.ezpark.web_service.reservations.domain.services.ReservationQueryService;
-import com.ezpark.web_service.reservations.infrastructure.repositories.jpa.ReservationRepository;
+import com.ezpark.web_service.reservations.infrastructure.persistence.jpa.repositories.ReservationRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;

@@ -45,7 +45,7 @@ public class ParkingCommandServiceImpl implements ParkingCommandService {
         try {
             var parking = result.get();
 
-            System.out.println("[DEBUG COMMAND DATA]" + command.address() + " " + command.numDirection());
+            System.out.println("[DEBUG COMMAND DATA]" + command.location().address() + " " + command.location().numDirection());
 
             parking.updateParking(command);
 

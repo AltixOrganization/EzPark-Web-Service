@@ -2,6 +2,7 @@ package com.ezpark.web_service.parkings.domain.model.entities;
 
 import com.ezpark.web_service.parkings.domain.model.aggregates.Parking;
 import com.ezpark.web_service.parkings.domain.model.commands.UpdateLocationCommand;
+import com.ezpark.web_service.shared.domain.model.entities.AuditableModel;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -13,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Data
 @Entity
 @Table(name = "locations")
-public class Location {
+public class Location extends AuditableModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

@@ -1,8 +1,6 @@
 package com.ezpark.web_service.profiles.interfaces.rest;
 
-import com.ezpark.web_service.profiles.domain.model.exceptions.ProfileNotFoundException;
-import com.ezpark.web_service.profiles.domain.model.exceptions.ProfileUpdateException;
-import com.ezpark.web_service.profiles.domain.model.exceptions.UserNotFoundException;
+import com.ezpark.web_service.profiles.domain.model.exceptions.*;
 import com.ezpark.web_service.shared.interfaces.rest.resources.ErrorResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -17,7 +15,7 @@ import java.util.List;
 
 import static com.ezpark.web_service.profiles.infrastructure.utils.ProfileErrorCatalog.*;
 
-@RestControllerAdvice(basePackages = "com.homeypark.web_service.profiles")
+@RestControllerAdvice(basePackages = "com.ezpark.web_service.profiles")
 public class ProfileControllerAdvice {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(ProfileNotFoundException.class)

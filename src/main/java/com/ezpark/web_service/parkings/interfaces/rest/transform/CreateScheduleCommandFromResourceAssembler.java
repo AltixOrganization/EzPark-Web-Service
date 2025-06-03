@@ -5,6 +5,11 @@ import com.ezpark.web_service.parkings.interfaces.rest.resources.CreateScheduleR
 
 public class CreateScheduleCommandFromResourceAssembler {
     public static CreateScheduleCommand toCommandFromResource(CreateScheduleResource resource) {
-        return new CreateScheduleCommand(resource.parkingId(), resource.day(), resource.startTime(), resource.endTime());
+        return new CreateScheduleCommand(
+                resource.parkingId(),
+                resource.day(),
+                resource.startTime(),
+                resource.endTime()
+        );
     }
 }

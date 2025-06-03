@@ -4,7 +4,7 @@ import com.ezpark.web_service.profiles.domain.model.aggregates.Profile;
 import com.ezpark.web_service.profiles.domain.model.queries.GetAllProfilesQuery;
 import com.ezpark.web_service.profiles.domain.model.queries.GetProfileByIdQuery;
 import com.ezpark.web_service.profiles.domain.services.ProfileQueryService;
-import com.ezpark.web_service.profiles.infrastructure.repositories.jpa.ProfileRepository;
+import com.ezpark.web_service.profiles.infrastructure.persistence.jpa.repositories.ProfileRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

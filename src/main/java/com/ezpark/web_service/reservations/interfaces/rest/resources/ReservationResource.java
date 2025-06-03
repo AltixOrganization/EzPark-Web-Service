@@ -2,6 +2,7 @@ package com.ezpark.web_service.reservations.interfaces.rest.resources;
 
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 public record ReservationResource(
@@ -17,6 +18,8 @@ public record ReservationResource(
         Long parkingId,
         Long vehicleId,
         String paymentReceiptUrl,
-        String paymentReceiptDeleteUrl
+        String paymentReceiptDeleteUrl,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
 ) {
 }

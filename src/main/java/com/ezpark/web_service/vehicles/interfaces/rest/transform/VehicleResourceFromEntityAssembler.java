@@ -11,7 +11,9 @@ public class VehicleResourceFromEntityAssembler {
                 entity.getLicensePlate(),
                 entity.getBrand(),
                 entity.getModel(),
-                entity.getProfileId().profileId().toString()
+                entity.getProfileId().profileId().toString(),
+                entity.getCreatedAt(),
+                entity.getUpdatedAt()
         );
     }
 }

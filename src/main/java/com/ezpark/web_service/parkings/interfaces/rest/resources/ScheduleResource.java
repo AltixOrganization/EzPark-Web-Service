@@ -1,5 +1,6 @@
 package com.ezpark.web_service.parkings.interfaces.rest.resources;
 
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 public record ScheduleResource(
@@ -7,6 +8,8 @@ public record ScheduleResource(
         Long parkingId,
         String day,
         LocalTime startTime,
-        LocalTime endTime
+        LocalTime endTime,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
 ) {
 }

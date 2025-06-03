@@ -1,6 +1,7 @@
 package com.ezpark.web_service.vehicles.domain.model.aggregates;
 
 
+import com.ezpark.web_service.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import com.ezpark.web_service.vehicles.domain.model.commands.CreateVehicleCommand;
 import com.ezpark.web_service.vehicles.domain.model.commands.UpdateVehicleCommand;
 import com.ezpark.web_service.vehicles.domain.model.valueobjects.ProfileId;
@@ -13,10 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Table(name = "vehicles")
 
-public class Vehicle {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Vehicle extends AuditableAbstractAggregateRoot<Vehicle> {
 
     private String licensePlate;
     private String model;

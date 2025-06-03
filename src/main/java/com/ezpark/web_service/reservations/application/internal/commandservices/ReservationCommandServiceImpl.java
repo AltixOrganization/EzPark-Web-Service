@@ -8,12 +8,13 @@ import com.ezpark.web_service.reservations.domain.model.aggregates.Reservation;
 import com.ezpark.web_service.reservations.domain.model.commands.CreateReservationCommand;
 import com.ezpark.web_service.reservations.domain.model.commands.UpdateReservationCommand;
 import com.ezpark.web_service.reservations.domain.model.commands.UpdateStatusCommand;
+import com.ezpark.web_service.reservations.domain.model.exceptions.*;
 import com.ezpark.web_service.reservations.domain.model.valueobject.ParkingId;
 import com.ezpark.web_service.reservations.domain.model.valueobject.Status;
 import com.ezpark.web_service.reservations.domain.services.ReservationCommandService;
 import com.ezpark.web_service.reservations.infrastructure.external.ImageUploadService;
 import com.ezpark.web_service.reservations.infrastructure.external.ImgbbResponse;
-import com.ezpark.web_service.reservations.infrastructure.repositories.jpa.ReservationRepository;
+import com.ezpark.web_service.reservations.infrastructure.persistence.jpa.repositories.ReservationRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -36,14 +37,14 @@ public class ReservationCommandServiceImpl implements ReservationCommandService 
     @Override
     public Optional<Reservation> handle(CreateReservationCommand command, MultipartFile file) {
         if (!externalProfileService.checkProfileExistById(command.guestId()) || !externalProfileService.checkProfileExistById(command.hostId())) {
-            throw new IllegalArgumentException("Guest or Host not found");
+            throw new ProfileNotFoundException();
         }
-        if (file.isEmpty()) throw new IllegalArgumentException("File is empty");
-        if (!externalVehicleService.checkVehicleExistById(command.vehicleId())) throw new IllegalArgumentException("Vehicle not found");
-        if (!externalParkingService.checkParkingExistById(command.parkingId())) throw new IllegalArgumentException("Parking not found");
+        if (file.isEmpty()) throw new EmptyFileException();
+        if (!externalVehicleService.checkVehicleExistById(command.vehicleId())) throw new VehicleNotFoundException();
+        if (!externalParkingService.checkParkingExistById(command.parkingId())) throw new ParkingNotFoundException();
 
         if (!externalScheduleService.doesScheduleEncloseTimeRange(command.reservationDate().getDayOfWeek().name(), command.startTime(), command.endTime())) {
-            throw new IllegalArgumentException("Schedule does not enclose the time range");
+            throw new ScheduleConflictException();
         }
 
         List<Status> blockedStatuses = List.of(Status.Approved, Status.InProgress, Status.Completed);
@@ -54,7 +55,7 @@ public class ReservationCommandServiceImpl implements ReservationCommandService 
                 command.startTime(),
                 command.endTime(),
                 blockedStatuses)) {
-            throw new IllegalArgumentException("Reservation time overlaps with an existing approved reservation");
+            throw new ReservationOverlapException();
         }
 
 
@@ -84,10 +85,10 @@ public class ReservationCommandServiceImpl implements ReservationCommandService 
     public Optional<Reservation> handle(UpdateReservationCommand command) {
         var result = reservationRepository.findById(command.reservationId());
         if (result.isEmpty())
-            throw new IllegalArgumentException("Reservation does not exist");
+            throw new ReservationNotFoundException();
 
         if (!externalScheduleService.doesScheduleEncloseTimeRange(command.reservationDate().getDayOfWeek().name(), command.startTime(), command.endTime())) {
-            throw new IllegalArgumentException("Schedule does not enclose the time range");
+            throw new ScheduleConflictException();
         }
 
         List<Status> blockedStatuses = List.of(Status.Approved, Status.InProgress, Status.Completed);
@@ -98,7 +99,7 @@ public class ReservationCommandServiceImpl implements ReservationCommandService 
                 command.startTime(),
                 command.endTime(),
                 blockedStatuses)) {
-            throw new IllegalArgumentException("Reservation time overlaps with an existing approved reservation");
+            throw new ReservationOverlapException();
         }
 
         var reservationToUpdate = result.get();
@@ -106,7 +107,7 @@ public class ReservationCommandServiceImpl implements ReservationCommandService 
             var updatedReservation= reservationRepository.save(reservationToUpdate.updatedReservation(command));
             return Optional.of(updatedReservation);
         }catch (Exception e){
-            throw new IllegalArgumentException("Error while updating reservation: " + e.getMessage());
+            throw new ReservationUpdateException();
         }
     }
 
@@ -114,13 +115,13 @@ public class ReservationCommandServiceImpl implements ReservationCommandService 
     public Optional<Reservation> handle(UpdateStatusCommand command) {
         var result = reservationRepository.findById(command.reservationId());
         if (result.isEmpty())
-            throw new IllegalArgumentException("Reservation does not exist");
+            throw new ReservationNotFoundException();
         var statusToUpdate = result.get();
         try {
             var updatedStatus = reservationRepository.save(statusToUpdate.updatedStatus(command));
             return Optional.of(updatedStatus);
         }catch (Exception e){
-            throw new IllegalArgumentException("Error while updating status: "+ e.getMessage());
+            throw new ReservationUpdateException();
         }
     }
 }
