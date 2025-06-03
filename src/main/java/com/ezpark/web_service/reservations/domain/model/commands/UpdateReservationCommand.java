@@ -9,5 +9,7 @@ public record UpdateReservationCommand(
         Double totalFare,
         LocalDate reservationDate,
         LocalTime startTime,
-        LocalTime endTime) {
+        LocalTime endTime,
+        Long scheduleId
+        ) {
 }

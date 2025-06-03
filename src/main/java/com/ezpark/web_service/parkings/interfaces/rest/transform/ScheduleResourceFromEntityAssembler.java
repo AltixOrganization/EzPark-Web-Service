@@ -8,9 +8,10 @@ public class ScheduleResourceFromEntityAssembler {
         return new ScheduleResource(
                 entity.getId(),
                 entity.getParking().getId(),
-                entity.getDay().name(),
+                entity.getDay(),
                 entity.getStartTime(),
                 entity.getEndTime(),
+                entity.getIsAvailable(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt()
         );

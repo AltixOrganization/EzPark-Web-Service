@@ -107,6 +107,16 @@ public class ReservationControllerAdvice {
         return response;
     }
 
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    @ExceptionHandler(ScheduleUpdateException.class)
+    public ErrorResource handleScheduleUpdateException() {
+        ErrorResource response = new ErrorResource();
+        response.setCode(RESERVATION_SCHEDULE_UPDATE_ERROR.getCode());
+        response.setMessage(RESERVATION_SCHEDULE_UPDATE_ERROR.getMessage());
+        response.setTimeStamp(LocalDateTime.now());
+        return response;
+    }
+
     // invalid JSON
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(HttpMessageNotReadableException.class)

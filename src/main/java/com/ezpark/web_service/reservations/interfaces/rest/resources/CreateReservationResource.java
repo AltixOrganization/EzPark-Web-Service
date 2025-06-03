@@ -35,5 +35,8 @@ public record CreateReservationResource(
         Long parkingId,
 
         @NotNull(message = "{reservation.vehicleId.not.null}")
-        Long vehicleId
+        Long vehicleId,
+
+        @NotNull(message = "{reservation.scheduleId.not.null}")
+        Long scheduleId
 ) {}

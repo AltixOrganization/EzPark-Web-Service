@@ -1,6 +1,7 @@
 package com.ezpark.web_service.parkings.interfaces.rest;
 
 import com.ezpark.web_service.parkings.domain.model.queries.GetAllScheduleQuery;
+import com.ezpark.web_service.parkings.domain.model.queries.GetScheduleByIdQuery;
 import com.ezpark.web_service.parkings.domain.services.ScheduleCommandService;
 import com.ezpark.web_service.parkings.domain.services.ScheduleQueryService;
 import com.ezpark.web_service.parkings.interfaces.rest.resources.CreateScheduleResource;
@@ -51,5 +52,13 @@ public class ScheduleController {
         var scheduleList = scheduleQueryService.handle(getAllScheduleQuery);
         var resource = scheduleList.stream().map(ScheduleResourceFromEntityAssembler::toResourceFromEntity).toList();
         return new ResponseEntity<>(resource, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ScheduleResource> getScheduleById(@PathVariable Long id) {
+        var schedule = scheduleQueryService.handle(new GetScheduleByIdQuery(id));
+        return schedule.map(ScheduleResourceFromEntityAssembler::toResourceFromEntity)
+                .map(resource -> new ResponseEntity<>(resource, HttpStatus.OK))
+                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 }

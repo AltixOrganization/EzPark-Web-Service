@@ -15,6 +15,7 @@ public enum ReservationErrorCatalog {
     EMPTY_FILE("ERR_RESERVATION_007", "Empty file"),
     IMAGE_UPLOAD_ERROR("ERR_RESERVATION_008", "Image upload error"),
     RESERVATION_UPDATE_ERROR("ERR_RESERVATION_009", "Reservation update error"),
+    RESERVATION_SCHEDULE_UPDATE_ERROR("ERR_RESERVATION_010", "Failed to mark schedule as unavailable when approving reservation"),
 
 
     // invalid parameters

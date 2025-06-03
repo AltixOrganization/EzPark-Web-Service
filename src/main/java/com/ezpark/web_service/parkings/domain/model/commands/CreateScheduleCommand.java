@@ -1,15 +1,16 @@
 package com.ezpark.web_service.parkings.domain.model.commands;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 
 public record CreateScheduleCommand(
         Long parkingId,
-        String day,
+        LocalDate day,
         LocalTime startTime,
         LocalTime endTime
 ) {
     public CreateScheduleCommand {
-        if (day == null || day.isBlank()) {
+        if (day == null ) {
             throw new IllegalArgumentException("Day cannot be null or empty");
         }
         if (startTime == null) {

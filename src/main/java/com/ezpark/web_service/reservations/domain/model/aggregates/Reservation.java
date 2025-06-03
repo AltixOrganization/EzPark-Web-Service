@@ -10,10 +10,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -30,9 +27,6 @@ public class Reservation extends AuditableAbstractAggregateRoot<Reservation> {
     private LocalDate reservationDate;
     private LocalTime startTime;
     private LocalTime endTime;
-
-    private String paymentReceiptUrl;
-    private String paymentReceiptDeleteUrl;
 
 
 
@@ -51,6 +45,9 @@ public class Reservation extends AuditableAbstractAggregateRoot<Reservation> {
     @Embedded
     private VehicleId vehicleId;
 
+    @Embedded
+    private ScheduleId scheduleId;
+
     public Reservation(CreateReservationCommand command) {
         this.hoursRegistered = command.hoursRegistered();
         this.totalFare = command.totalFare();
@@ -61,6 +58,7 @@ public class Reservation extends AuditableAbstractAggregateRoot<Reservation> {
         this.guestId = new GuestId(command.guestId());
         this.parkingId = new ParkingId(command.parkingId());
         this.vehicleId = new VehicleId(command.vehicleId());
+        this.scheduleId = new ScheduleId(command.scheduleId());
         this.status = Status.Pending;
     }
     public Reservation updatedReservation(UpdateReservationCommand command){
@@ -69,6 +67,7 @@ public class Reservation extends AuditableAbstractAggregateRoot<Reservation> {
         this.reservationDate = command.reservationDate();
         this.startTime = command.startTime();
         this.endTime = command.endTime();
+        this.scheduleId = new ScheduleId(command.scheduleId());
         return this;
     }
     public Reservation updatedStatus(UpdateStatusCommand command){

@@ -1,14 +1,16 @@
 package com.ezpark.web_service.parkings.interfaces.rest.resources;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 public record ScheduleResource(
         Long id,
         Long parkingId,
-        String day,
+        LocalDate day,
         LocalTime startTime,
         LocalTime endTime,
+        Boolean isAvailable,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {

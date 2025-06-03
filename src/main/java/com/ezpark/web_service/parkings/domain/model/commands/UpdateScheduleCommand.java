@@ -1,10 +1,11 @@
 package com.ezpark.web_service.parkings.domain.model.commands;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 
 public record UpdateScheduleCommand(
         Long scheduleId,
-        String day,
+        LocalDate day,
         LocalTime startTime,
         LocalTime endTime
 ){
@@ -12,7 +13,7 @@ public record UpdateScheduleCommand(
         if (scheduleId == null || scheduleId <= 0) {
             throw new IllegalArgumentException("Schedule ID cannot be null.");
         }
-        if (day == null || day.isEmpty()) {
+        if (day == null) {
             throw new IllegalArgumentException("Day cannot be null or empty.");
         }
         if (startTime == null) {
