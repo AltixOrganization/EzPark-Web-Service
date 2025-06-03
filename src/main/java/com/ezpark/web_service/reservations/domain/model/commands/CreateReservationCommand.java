@@ -12,7 +12,8 @@ public record CreateReservationCommand(
         Long guestId,
         Long hostId,
         Long parkingId,
-        Long vehicleId
+        Long vehicleId,
+        Long scheduleId
 ) {
     public CreateReservationCommand {
         if (hoursRegistered == null || hoursRegistered <= 0) {

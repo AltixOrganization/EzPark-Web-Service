@@ -12,13 +12,10 @@ import com.ezpark.web_service.reservations.domain.model.exceptions.*;
 import com.ezpark.web_service.reservations.domain.model.valueobject.ParkingId;
 import com.ezpark.web_service.reservations.domain.model.valueobject.Status;
 import com.ezpark.web_service.reservations.domain.services.ReservationCommandService;
-import com.ezpark.web_service.reservations.infrastructure.external.ImageUploadService;
-import com.ezpark.web_service.reservations.infrastructure.external.ImgbbResponse;
 import com.ezpark.web_service.reservations.infrastructure.persistence.jpa.repositories.ReservationRepository;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,20 +27,18 @@ public class ReservationCommandServiceImpl implements ReservationCommandService 
     private final ExternalProfileService externalProfileService;
     private final ExternalVehicleService externalVehicleService;
     private final ExternalParkingService externalParkingService;
-    private final ImageUploadService imageUploadService;
     private final ExternalScheduleService externalScheduleService;
 
     @Transactional
     @Override
-    public Optional<Reservation> handle(CreateReservationCommand command, MultipartFile file) {
+    public Optional<Reservation> handle(CreateReservationCommand command) {
         if (!externalProfileService.checkProfileExistById(command.guestId()) || !externalProfileService.checkProfileExistById(command.hostId())) {
             throw new ProfileNotFoundException();
         }
-        if (file.isEmpty()) throw new EmptyFileException();
         if (!externalVehicleService.checkVehicleExistById(command.vehicleId())) throw new VehicleNotFoundException();
         if (!externalParkingService.checkParkingExistById(command.parkingId())) throw new ParkingNotFoundException();
 
-        if (!externalScheduleService.doesScheduleEncloseTimeRange(command.reservationDate().getDayOfWeek().name(), command.startTime(), command.endTime())) {
+        if (!externalScheduleService.isScheduleAvailable(command.scheduleId())) {
             throw new ScheduleConflictException();
         }
 
@@ -58,20 +53,9 @@ public class ReservationCommandServiceImpl implements ReservationCommandService 
             throw new ReservationOverlapException();
         }
 
-
         var reservation = new Reservation(command);
         reservation.setStatus(Status.Pending);
         try {
-            ImgbbResponse imgbbResponse = imageUploadService.uploadImage(file).block();
-
-            if (imgbbResponse != null && imgbbResponse.success()) {
-                reservation.setPaymentReceiptUrl(imgbbResponse.data().url());
-                reservation.setPaymentReceiptDeleteUrl(imgbbResponse.data().deleteUrl());
-            } else {
-                System.err.println("Error al cargar la imagen o respuesta no exitosa de ImgBB.");
-                return Optional.empty();
-            }
-
             var response = reservationRepository.save(reservation);
             return Optional.of(response);
         } catch (Exception e) {
@@ -86,8 +70,9 @@ public class ReservationCommandServiceImpl implements ReservationCommandService 
         var result = reservationRepository.findById(command.reservationId());
         if (result.isEmpty())
             throw new ReservationNotFoundException();
-
-        if (!externalScheduleService.doesScheduleEncloseTimeRange(command.reservationDate().getDayOfWeek().name(), command.startTime(), command.endTime())) {
+        Long currentScheduleId = result.get().getScheduleId().scheduleId();
+        if (!command.scheduleId().equals(currentScheduleId) &&
+                !externalScheduleService.isScheduleAvailable(command.scheduleId())) {
             throw new ScheduleConflictException();
         }
 
@@ -112,12 +97,21 @@ public class ReservationCommandServiceImpl implements ReservationCommandService 
     }
 
     @Override
+    @Transactional
     public Optional<Reservation> handle(UpdateStatusCommand command) {
         var result = reservationRepository.findById(command.reservationId());
         if (result.isEmpty())
             throw new ReservationNotFoundException();
         var statusToUpdate = result.get();
         try {
+            if (command.status() == Status.Approved) {
+                boolean updated = externalScheduleService.markScheduleAsUnavailable(
+                        statusToUpdate.getScheduleId().scheduleId());
+
+                if (!updated) {
+                    throw new ScheduleUpdateException();
+                }
+            }
             var updatedStatus = reservationRepository.save(statusToUpdate.updatedStatus(command));
             return Optional.of(updatedStatus);
         }catch (Exception e){

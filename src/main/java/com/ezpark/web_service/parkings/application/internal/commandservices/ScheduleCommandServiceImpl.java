@@ -1,8 +1,10 @@
 package com.ezpark.web_service.parkings.application.internal.commandservices;
 
 import com.ezpark.web_service.parkings.domain.model.commands.CreateScheduleCommand;
+import com.ezpark.web_service.parkings.domain.model.commands.MarkScheduleAsUnavailable;
 import com.ezpark.web_service.parkings.domain.model.commands.UpdateScheduleCommand;
 import com.ezpark.web_service.parkings.domain.model.entities.Schedule;
+import com.ezpark.web_service.parkings.domain.model.exceptions.*;
 import com.ezpark.web_service.parkings.domain.services.ScheduleCommandService;
 import com.ezpark.web_service.parkings.infrastructure.persistence.jpa.repositories.ParkingRepository;
 import com.ezpark.web_service.parkings.infrastructure.persistence.jpa.repositories.ScheduleRepository;
@@ -29,7 +31,7 @@ public class ScheduleCommandServiceImpl implements ScheduleCommandService {
             parking.map((p) -> {
                 schedule.setParking(p);
                 return p;
-            }).orElseThrow(() -> new IllegalArgumentException("Parking not founded"));
+            }).orElseThrow(ParkingNotFoundException::new);
 
             var response = scheduleRepository.save(schedule);
             return Optional.of(response);
@@ -43,13 +45,26 @@ public class ScheduleCommandServiceImpl implements ScheduleCommandService {
     public Optional<Schedule> handle(UpdateScheduleCommand command) {
         var result = scheduleRepository.findById(command.scheduleId());
         if (result.isEmpty())
-            throw new IllegalArgumentException("Schedule does not exist");
+            throw new ScheduleNotFoundException();
         var scheduleToUpdate = result.get();
         try {
             var updatedSchedule = scheduleRepository.save(scheduleToUpdate.updatedSchedule(command));
             return Optional.of(updatedSchedule);
         } catch (Exception e) {
-            throw new IllegalArgumentException("Error while updating schedule: " + e.getMessage());
+            throw new ScheduleUpdateException();
         }
+    }
+
+    @Override
+    public Optional<Schedule> handle(MarkScheduleAsUnavailable command) {
+        var scheduleOptional = scheduleRepository.findById(command.scheduleId());
+
+        if (scheduleOptional.isEmpty()) {
+            return Optional.empty();
+        }
+
+        var schedule = scheduleOptional.get();
+        schedule.setIsAvailable(false);
+        return Optional.of(scheduleRepository.save(schedule));
     }
 }
