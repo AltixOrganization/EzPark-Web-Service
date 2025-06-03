@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/reservations")
@@ -97,10 +96,6 @@ public class ReservationController {
                 .map(ReservationResourceFromEntityAssembler::toResourceFromEntity)
                 .toList();
         return new ResponseEntity<>(reservationList,HttpStatus.OK);
-    }
-    @GetMapping("/{id}/details")
-    public ResponseEntity<Map<String, Object>> getReservationDetails(@PathVariable("id") Long id) {
-        return null;
     }
 
     @GetMapping("/inProgress")

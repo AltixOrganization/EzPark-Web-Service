@@ -9,6 +9,7 @@ import com.ezpark.web_service.profiles.domain.model.commands.UpdateProfileComman
 import com.ezpark.web_service.profiles.domain.model.exceptions.*;
 import com.ezpark.web_service.profiles.domain.services.ProfileCommandService;
 import com.ezpark.web_service.profiles.infrastructure.persistence.jpa.repositories.ProfileRepository;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -19,7 +20,7 @@ public class ProfileCommandServiceImpl implements ProfileCommandService {
     private final ProfileRepository profileRepository;
     private final ExternalUserService externalUserService;
 
-    public ProfileCommandServiceImpl(ProfileRepository profileRepository, ExternalUserService externalUserService) {
+    public ProfileCommandServiceImpl(ProfileRepository profileRepository, @Lazy ExternalUserService externalUserService) {
         this.profileRepository = profileRepository;
         this.externalUserService = externalUserService;
     }
