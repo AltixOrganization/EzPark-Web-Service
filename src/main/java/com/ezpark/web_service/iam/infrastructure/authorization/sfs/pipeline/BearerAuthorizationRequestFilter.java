@@ -27,14 +27,14 @@ import java.io.IOException;
 public class BearerAuthorizationRequestFilter extends OncePerRequestFilter {
 
   private static final Logger LOGGER
-      = LoggerFactory.getLogger(BearerAuthorizationRequestFilter.class);
+          = LoggerFactory.getLogger(BearerAuthorizationRequestFilter.class);
   private final BearerTokenService tokenService;
 
   @Qualifier("defaultUserDetailsService")
   private final UserDetailsService userDetailsService;
 
   public BearerAuthorizationRequestFilter(BearerTokenService tokenService,
-      UserDetailsService userDetailsService) {
+                                          UserDetailsService userDetailsService) {
     this.tokenService = tokenService;
     this.userDetailsService = userDetailsService;
   }
@@ -47,18 +47,18 @@ public class BearerAuthorizationRequestFilter extends OncePerRequestFilter {
    */
   @Override
   protected void doFilterInternal(@NonNull HttpServletRequest request,
-      @NonNull HttpServletResponse response, @NonNull FilterChain filterChain)
-      throws ServletException, IOException {
+                                  @NonNull HttpServletResponse response, @NonNull FilterChain filterChain)
+          throws ServletException, IOException {
 
     try {
       String token = tokenService.getBearerTokenFrom(request);
       LOGGER.info("Token: {}", token);
       if (token != null && tokenService.validateToken(token)) {
-        String username = tokenService.getUsernameFromToken(token);
-        var userDetails = userDetailsService.loadUserByUsername(username);
+        Long userId = tokenService.getUserIdFromToken(token);
+        var userDetails = userDetailsService.loadUserByUsername(userId.toString());
         SecurityContextHolder.getContext()
-            .setAuthentication(
-                UsernamePasswordAuthenticationTokenBuilder.build(userDetails, request));
+                .setAuthentication(
+                        UsernamePasswordAuthenticationTokenBuilder.build(userDetails, request));
       }
       else {
         LOGGER.info("Token is not valid");

@@ -50,6 +50,6 @@ public class UserDetailsImpl implements UserDetails {
         .map(SimpleGrantedAuthority::new)
         .collect(Collectors.toList());
 
-    return new UserDetailsImpl(user.getUsername(), user.getPassword(), authorities);
+    return new UserDetailsImpl(user.getEmail(), user.getPassword(), authorities);
   }
 }

@@ -1,13 +1,13 @@
 package com.ezpark.web_service.parkings.application.internal.outboundservices.acl;
 
-import com.ezpark.web_service.profiles.interfaces.acl.ProfilesContextFacade;
+import com.ezpark.web_service.profiles.interfaces.acl.ProfileContextFacade;
 import org.springframework.stereotype.Service;
 
 @Service("parkingExternalProfileService")
 public class ExternalProfileService {
-    private final ProfilesContextFacade userContextFacade;
+    private final ProfileContextFacade userContextFacade;
 
-    public ExternalProfileService(ProfilesContextFacade userContextFacade) {
+    public ExternalProfileService(ProfileContextFacade userContextFacade) {
         this.userContextFacade = userContextFacade;
     }
     public boolean checkProfileExistById(Long userId) {
