@@ -20,10 +20,17 @@ class ParkingTest {
     void setUp() {
         // Arrange: Crear mocks y objetos necesarios
         mockLocation = mock(Location.class);
-        mockCommand = new CreateParkingCommand(1L, 2.5, 5.0, 3.0, 10.0,
-                "123456789", 1, "Test Description",
-                "Test Address", "123", "Test Street",
-                "Test District", "Test City", 12.34, 56.78);
+        mockCommand = new CreateParkingCommand(
+                1L, // profileId
+                2.5, // width
+                5.0, // length
+                3.0, // height
+                10.0, // price
+                "123456789", // phone
+                1, // space
+                "Test Description", // description
+                null // location (can be null for this test)
+        );
 
         parking = new Parking();
     }

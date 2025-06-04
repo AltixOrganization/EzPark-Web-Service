@@ -6,63 +6,51 @@ import com.ezpark.web_service.profiles.domain.model.commands.UpdateProfileComman
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import java.time.LocalDate;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class ProfileTest {
 
-    private CreateProfileCommand mockCreateCommand;
-    private UpdateProfileCommand mockUpdateCommand;
-    private Profile mockProfile;
+    private CreateProfileCommand createCommand;
+    private UpdateProfileCommand updateCommand;
 
     @BeforeEach
     void setUp() {
-        // Arrange: Initialize commands and mock
-        mockCreateCommand = new CreateProfileCommand("John", "Doe", "123 Test Street", 1L);
-        mockUpdateCommand = new UpdateProfileCommand(1L, "Jane", "Smith", "456 New Street");
-        mockProfile = mock(Profile.class);
+        createCommand = new CreateProfileCommand("John", "Doe", LocalDate.of(2000, 1, 1), 1L);
+        updateCommand = new UpdateProfileCommand(1L, "Jane", "Smith", LocalDate.of(1995, 5, 5));
     }
 
     @Test
     void testConstructorWithCreateCommand() {
-        //Arrange
-        CreateProfileCommand command = mockCreateCommand;
+        Profile profile = new Profile(createCommand);
 
-        // Act
-        Profile profile = new Profile(command);
-
-        // Assert
-        assertEquals("John", profile.getName());
+        assertEquals("John", profile.getFirstName());
         assertEquals("Doe", profile.getLastName());
-        assertEquals("123 Test Street", profile.getAddress());
+        assertEquals(LocalDate.of(2000, 1, 1), profile.getBirthDate());
         assertNotNull(profile.getUserId());
         assertEquals(1L, profile.getUserId().userIdAsPrimitive());
     }
 
     @Test
     void testUpdateProfile() {
-        //Arrange
-        UpdateProfileCommand command = mockUpdateCommand;
+        Profile profile = new Profile(createCommand);
+        profile.updatedProfile(updateCommand);
 
-        // Act
-        mockProfile.updatedProfile(command);
-
-        // Assert
-        verify(mockProfile).updatedProfile(command);
+        assertEquals("Jane", profile.getFirstName());
+        assertEquals("Smith", profile.getLastName());
+        assertEquals(LocalDate.of(1995, 5, 5), profile.getBirthDate());
     }
 
     @Test
     void testSettersAndGetters() {
-        // Act
-        mockProfile.setName("Alice");
-        mockProfile.setLastName("Brown");
-        mockProfile.setAddress("789 Another Street");
+        Profile profile = new Profile();
+        profile.setFirstName("Alice");
+        profile.setLastName("Brown");
+        profile.setBirthDate(LocalDate.of(1990, 2, 2));
 
-        // Assert
-        verify(mockProfile).setName("Alice");
-        verify(mockProfile).setLastName("Brown");
-        verify(mockProfile).setAddress("789 Another Street");
+        assertEquals("Alice", profile.getFirstName());
+        assertEquals("Brown", profile.getLastName());
+        assertEquals(LocalDate.of(1990, 2, 2), profile.getBirthDate());
     }
 }

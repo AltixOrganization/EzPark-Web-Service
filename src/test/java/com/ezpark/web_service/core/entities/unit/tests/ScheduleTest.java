@@ -3,76 +3,71 @@ package com.ezpark.web_service.core.entities.unit.tests;
 import com.ezpark.web_service.parkings.domain.model.commands.CreateScheduleCommand;
 import com.ezpark.web_service.parkings.domain.model.commands.UpdateScheduleCommand;
 import com.ezpark.web_service.parkings.domain.model.entities.Schedule;
-import com.ezpark.web_service.parkings.domain.model.valueobjects.WeekDay;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ScheduleTest {
 
     private CreateScheduleCommand createCommand;
     private UpdateScheduleCommand updateCommand;
-    private Schedule mockSchedule;
 
     @BeforeEach
     void setUp() {
-        // Arrange: Initialize commands and mock
-        createCommand = new CreateScheduleCommand(1L, "MONDAY",
+        createCommand = new CreateScheduleCommand(
+                1L,
+                LocalDate.of(2024, 6, 5),
                 LocalTime.of(8, 0),
-                LocalTime.of(18, 0));
+                LocalTime.of(18, 0)
+        );
 
-        updateCommand = new UpdateScheduleCommand(1L, "TUESDAY",
+        updateCommand = new UpdateScheduleCommand(
+                1L,
+                LocalDate.of(2024, 6, 6),
                 LocalTime.of(9, 0),
-                LocalTime.of(17, 0));
-
-        mockSchedule = mock(Schedule.class);
+                LocalTime.of(17, 0)
+        );
     }
 
     @Test
     void testConstructorWithCommand() {
-        // Arrange
-        CreateScheduleCommand command = createCommand;
-
-        // Act
         Schedule schedule = new Schedule(createCommand);
 
-        // Assert
-        assertEquals("MONDAY", schedule.getDay().toString());
+        assertEquals(LocalDate.of(2024, 6, 5), schedule.getDay());
         assertEquals(LocalTime.of(8, 0), schedule.getStartTime());
         assertEquals(LocalTime.of(18, 0), schedule.getEndTime());
+        assertTrue(schedule.getIsAvailable());
     }
 
     @Test
     void testUpdateSchedule() {
-        // Arrange
-        UpdateScheduleCommand command = updateCommand;
+        Schedule schedule = new Schedule(createCommand);
+        schedule.updatedSchedule(updateCommand);
 
-        // Act
-        mockSchedule.updatedSchedule(updateCommand);
-
-        // Assert
-        verify(mockSchedule).updatedSchedule(updateCommand);
+        assertEquals(LocalDate.of(2024, 6, 6), schedule.getDay());
+        assertEquals(LocalTime.of(9, 0), schedule.getStartTime());
+        assertEquals(LocalTime.of(17, 0), schedule.getEndTime());
     }
 
     @Test
     void testSettersAndGetters() {
-        // Arrange
+        Schedule schedule = new Schedule();
+        LocalDate day = LocalDate.of(2024, 6, 7);
         LocalTime startTime = LocalTime.of(10, 0);
         LocalTime endTime = LocalTime.of(16, 0);
 
-        // Act
-        mockSchedule.setDay(WeekDay.valueOf("WEDNESDAY"));
-        mockSchedule.setStartTime(startTime);
-        mockSchedule.setEndTime(endTime);
+        schedule.setDay(day);
+        schedule.setStartTime(startTime);
+        schedule.setEndTime(endTime);
+        schedule.setIsAvailable(false);
 
-        // Assert
-        verify(mockSchedule).setDay(WeekDay.valueOf("WEDNESDAY"));
-        verify(mockSchedule).setStartTime(startTime);
-        verify(mockSchedule).setEndTime(endTime);
+        assertEquals(day, schedule.getDay());
+        assertEquals(startTime, schedule.getStartTime());
+        assertEquals(endTime, schedule.getEndTime());
+        assertFalse(schedule.getIsAvailable());
     }
 }

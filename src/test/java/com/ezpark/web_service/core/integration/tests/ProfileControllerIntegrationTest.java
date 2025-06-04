@@ -16,6 +16,7 @@ import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -36,7 +37,12 @@ public class ProfileControllerIntegrationTest {
 
     @Test
     void testCreateProfileSuccess() {
-        CreateProfileResource resource = new CreateProfileResource("John", "Doe", "john.doe@email.com", 1L);
+        CreateProfileResource resource = new CreateProfileResource(
+                "John",
+                "Doe",
+                LocalDate.of(1990, 1, 1), // Example date
+                1L
+        );
         CreateProfileCommand command = CreateProfileCommandFromResourceAssembler.toCommandFromResource(resource);
         Profile profile = new Profile(command);
 
@@ -48,13 +54,13 @@ public class ProfileControllerIntegrationTest {
         assertNotNull(response);
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals("John", response.getBody().name());
+        assertEquals("John", response.getBody().firstName());
     }
 
     @Test
     void testGetProfileByIdSuccess() {
         Long profileId = 1L;
-        Profile profile = new Profile(new CreateProfileCommand("John", "Doe", "john.doe@email.com", 1L));
+        Profile profile = new Profile(new CreateProfileCommand("John", "Doe", LocalDate.of(1990, 1, 1), 1L));
 
         Mockito.when(profileQueryService.handle(ArgumentMatchers.any(GetProfileByIdQuery.class)))
                 .thenReturn(Optional.of(profile));
@@ -64,6 +70,6 @@ public class ProfileControllerIntegrationTest {
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals("John", response.getBody().name());
+        assertEquals("John", response.getBody().firstName());
     }
 }

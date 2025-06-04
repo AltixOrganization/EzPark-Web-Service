@@ -2,7 +2,6 @@ package com.ezpark.web_service.core.integration.tests;
 
 import com.ezpark.web_service.parkings.domain.model.aggregates.Parking;
 import com.ezpark.web_service.parkings.domain.model.commands.CreateParkingCommand;
-import com.ezpark.web_service.parkings.domain.model.entities.Location;
 import com.ezpark.web_service.parkings.domain.model.queries.GetAllParkingQuery;
 import com.ezpark.web_service.parkings.domain.model.valueobjects.ProfileId;
 import com.ezpark.web_service.parkings.domain.services.ParkingCommandService;
@@ -20,8 +19,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.Collections;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ParkingControllerIntegrationTest {
 
@@ -38,79 +36,66 @@ public class ParkingControllerIntegrationTest {
 
     @Test
     void testCreateParkingSuccess() {
-        // Arrange
         CreateParkingResource resource = new CreateParkingResource(
-                1L, 2.5, 5.0, 2.0, 10.0, "987654321", 1, "Espacio techado",
-                "Av. Ejemplo", "456", "Calle Principal", "Surco", "Lima", -12.1, -77.03
+                1L, // profileId
+                2.5, // width
+                5.0, // length
+                2.0, // height
+                10.0, // price
+                "987654321", // phone
+                2, // space
+                "Espacio techado", // description
+                null // location (assuming it's not used in this test)
         );
-
         Parking parking = new Parking();
-        parking.setId(1L);
-        parking.setPhone("987654321");
-        parking.setDescription("Espacio techado");
-        parking.setProfileId(new ProfileId(1L));
-        parking.setSpace(1);
-        parking.setWidth(2.5);
-        parking.setLength(5.0);
-        parking.setHeight(2.0);
-        parking.setPrice(10.0);
-
-        Location location = new Location();
-        location.setAddress("Av. Ejemplo");
-        location.setNumDirection("456");
-        location.setStreet("Calle Principal");
-        location.setDistrict("Surco");
-        location.setCity("Lima");
-        location.setLatitude(-12.1);
-        location.setLongitude(-77.03);
-        parking.setLocation(location);
 
         Mockito.when(parkingCommandService.handle(ArgumentMatchers.any(CreateParkingCommand.class)))
                 .thenReturn(Optional.of(parking));
 
-        // Act
         ResponseEntity<ParkingResource> response = parkingController.createParking(resource);
 
-        // Assert
         assertNotNull(response);
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertNotNull(response.getBody());
         assertEquals("987654321", response.getBody().phone());
         assertEquals("Espacio techado", response.getBody().description());
     }
 
     @Test
-    void testGetAllParkingSuccess() {
-        // Arrange
-        Parking parking = new Parking();
-        parking.setId(1L);
-        parking.setPhone("123456789");
-        parking.setDescription("Parqueo iluminado");
-        parking.setProfileId(new ProfileId(1L));
-        parking.setSpace(1);
-        parking.setWidth(2.5);
-        parking.setLength(5.0);
-        parking.setHeight(2.0);
-        parking.setPrice(10.0);
+    void testCreateParkingBadRequest() {
+        CreateParkingResource resource = new CreateParkingResource(
+                null, // profileId (null to trigger validation error)
+                2.5, // width
+                5.0, // length
+                2.0, // height
+                10.0, // price
+                "987654321", // phone
+                2, // space
+                "Espacio techado", // description
+                null // location (assuming it's not used in this test)
+        );
 
-        Location location = new Location();
-        location.setAddress("Av. Siempre Viva");
-        location.setNumDirection("742");
-        location.setStreet("Springfield Street");
-        location.setDistrict("Springfield");
-        location.setCity("Illinois");
-        location.setLatitude(-12.0464);
-        location.setLongitude(-77.0428);
-        parking.setLocation(location);
+        Mockito.when(parkingCommandService.handle(ArgumentMatchers.any(CreateParkingCommand.class)))
+                .thenReturn(Optional.empty());
+
+        ResponseEntity<ParkingResource> response = parkingController.createParking(resource);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    }
+
+    @Test
+    void testGetAllParkingSuccess() {
+        Parking parking = new Parking();
 
         Mockito.when(parkingQueryService.handle(ArgumentMatchers.any(GetAllParkingQuery.class)))
                 .thenReturn(Collections.singletonList(parking));
 
-        // Act
         ResponseEntity<?> response = parkingController.getAllParking();
 
-        // Assert
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertTrue(response.getBody() instanceof java.util.List<?>);
         assertEquals(1, ((java.util.List<?>) response.getBody()).size());
     }
 }
