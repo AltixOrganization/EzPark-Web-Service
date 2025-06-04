@@ -12,13 +12,10 @@ import com.ezpark.web_service.reservations.interfaces.rest.transformers.Reservat
 import com.ezpark.web_service.reservations.interfaces.rest.transformers.UpdateReservationCommandFromResourceAssembler;
 import com.ezpark.web_service.reservations.interfaces.rest.transformers.UpdateStatusCommandFromResourceAssembler;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/reservations")
@@ -42,15 +39,14 @@ public class ReservationController {
      return new ResponseEntity<>(reservationList,HttpStatus.OK);
     }
 
-    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PostMapping
     public ResponseEntity<ReservationResource> createReservation(
-            @RequestPart("file") MultipartFile file,
-            @RequestPart("reservation") CreateReservationResource createReservationResource
+            @RequestBody CreateReservationResource createReservationResource
             ) {
 
         var createReservationCommand = CreateReservationCommandFromResourceAssembler.toCommandFromResource(createReservationResource);
 
-        var reservation = reservationCommandService.handle(createReservationCommand, file)
+        var reservation = reservationCommandService.handle(createReservationCommand)
                 .map(ReservationResourceFromEntityAssembler::toResourceFromEntity);
 
         return reservation.map(r -> new ResponseEntity<>(r, HttpStatus.CREATED))
@@ -97,10 +93,6 @@ public class ReservationController {
                 .map(ReservationResourceFromEntityAssembler::toResourceFromEntity)
                 .toList();
         return new ResponseEntity<>(reservationList,HttpStatus.OK);
-    }
-    @GetMapping("/{id}/details")
-    public ResponseEntity<Map<String, Object>> getReservationDetails(@PathVariable("id") Long id) {
-        return null;
     }
 
     @GetMapping("/inProgress")

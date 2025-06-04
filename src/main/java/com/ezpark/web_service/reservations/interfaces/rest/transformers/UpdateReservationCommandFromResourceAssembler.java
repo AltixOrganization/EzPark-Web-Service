@@ -10,7 +10,8 @@ public class UpdateReservationCommandFromResourceAssembler {
                 resource.totalFare(),
                 resource.reservationDate(),
                 resource.startTime(),
-                resource.endTime()
+                resource.endTime(),
+                resource.scheduleId()
         );
     }
 }

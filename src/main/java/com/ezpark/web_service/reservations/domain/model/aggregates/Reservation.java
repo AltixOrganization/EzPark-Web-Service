@@ -4,15 +4,13 @@ import com.ezpark.web_service.reservations.domain.model.commands.CreateReservati
 import com.ezpark.web_service.reservations.domain.model.commands.UpdateReservationCommand;
 import com.ezpark.web_service.reservations.domain.model.commands.UpdateStatusCommand;
 import com.ezpark.web_service.reservations.domain.model.valueobject.*;
+import com.ezpark.web_service.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -22,19 +20,13 @@ import java.time.LocalTime;
 @Entity
 @NoArgsConstructor
 @Table(name = "reservations")
-public class Reservation {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Reservation extends AuditableAbstractAggregateRoot<Reservation> {
 
     private Integer hoursRegistered;
     private Double totalFare;
     private LocalDate reservationDate;
     private LocalTime startTime;
     private LocalTime endTime;
-
-    private String paymentReceiptUrl;
-    private String paymentReceiptDeleteUrl;
 
 
 
@@ -53,11 +45,8 @@ public class Reservation {
     @Embedded
     private VehicleId vehicleId;
 
-    @CreationTimestamp
-    private Instant createdAt;
-
-    @UpdateTimestamp
-    private Instant updatedAt;
+    @Embedded
+    private ScheduleId scheduleId;
 
     public Reservation(CreateReservationCommand command) {
         this.hoursRegistered = command.hoursRegistered();
@@ -69,6 +58,7 @@ public class Reservation {
         this.guestId = new GuestId(command.guestId());
         this.parkingId = new ParkingId(command.parkingId());
         this.vehicleId = new VehicleId(command.vehicleId());
+        this.scheduleId = new ScheduleId(command.scheduleId());
         this.status = Status.Pending;
     }
     public Reservation updatedReservation(UpdateReservationCommand command){
@@ -77,6 +67,7 @@ public class Reservation {
         this.reservationDate = command.reservationDate();
         this.startTime = command.startTime();
         this.endTime = command.endTime();
+        this.scheduleId = new ScheduleId(command.scheduleId());
         return this;
     }
     public Reservation updatedStatus(UpdateStatusCommand command){

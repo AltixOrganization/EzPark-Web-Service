@@ -15,7 +15,7 @@ import java.util.List;
 
 import static com.ezpark.web_service.iam.infrastructure.utils.IamErrorCatalog.*;
 
-@RestControllerAdvice(basePackages = "com.homeypark.web_service.iam")
+@RestControllerAdvice(basePackages = "com.ezpark.web_service.iam")
 public class IamControllerAdvice {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(UserNotFoundException.class)

@@ -5,6 +5,15 @@ import com.ezpark.web_service.parkings.interfaces.rest.resources.ScheduleResourc
 
 public class ScheduleResourceFromEntityAssembler {
     public static ScheduleResource toResourceFromEntity(Schedule entity) {
-        return new ScheduleResource(entity.getId(), entity.getParking().getId(), entity.getDay().name(), entity.getStartTime(), entity.getEndTime());
+        return new ScheduleResource(
+                entity.getId(),
+                entity.getParking().getId(),
+                entity.getDay(),
+                entity.getStartTime(),
+                entity.getEndTime(),
+                entity.getIsAvailable(),
+                entity.getCreatedAt(),
+                entity.getUpdatedAt()
+        );
     }
 }

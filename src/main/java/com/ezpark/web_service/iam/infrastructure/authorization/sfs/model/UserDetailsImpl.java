@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 public class UserDetailsImpl implements UserDetails {
 
   private final String username;
+  private final Long userId;
   @JsonIgnore
   private final String password;
   private final boolean accountNonExpired;
@@ -28,9 +29,10 @@ public class UserDetailsImpl implements UserDetails {
   private final boolean enabled;
   private final Collection<? extends GrantedAuthority> authorities;
 
-  public UserDetailsImpl(String username, String password,
+  public UserDetailsImpl(String username, Long userId ,String password,
       Collection<? extends GrantedAuthority> authorities) {
     this.username = username;
+    this.userId = userId;
     this.password = password;
     this.authorities = authorities;
     this.accountNonExpired = true;
@@ -50,6 +52,6 @@ public class UserDetailsImpl implements UserDetails {
         .map(SimpleGrantedAuthority::new)
         .collect(Collectors.toList());
 
-    return new UserDetailsImpl(user.getEmail(), user.getPassword(), authorities);
+    return new UserDetailsImpl(user.getEmail(), user.getId(),user.getPassword(), authorities);
   }
 }

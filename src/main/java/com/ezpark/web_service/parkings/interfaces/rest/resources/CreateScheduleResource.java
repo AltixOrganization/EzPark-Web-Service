@@ -1,11 +1,22 @@
 package com.ezpark.web_service.parkings.interfaces.rest.resources;
 
+
+import jakarta.validation.constraints.NotNull;
+
+import java.time.LocalDate;
 import java.time.LocalTime;
 
 public record CreateScheduleResource(
+        @NotNull(message = "{schedule.parkingId.not.null}")
         Long parkingId,
-        String day,
+
+        @NotNull(message = "{schedule.day.not.null}")
+        LocalDate day,
+
+        @NotNull(message = "{schedule.startTime.not.null}")
         LocalTime startTime,
+
+        @NotNull(message = "{schedule.endTime.not.null}")
         LocalTime endTime
 ) {
 }

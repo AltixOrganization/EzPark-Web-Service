@@ -1,4 +1,4 @@
-package com.ezpark.web_service.reservations.infrastructure.repositories.jpa;
+package com.ezpark.web_service.reservations.infrastructure.persistence.jpa.repositories;
 
 import com.ezpark.web_service.reservations.domain.model.aggregates.Reservation;
 import com.ezpark.web_service.reservations.domain.model.valueobject.GuestId;

@@ -8,7 +8,7 @@ import com.ezpark.web_service.profiles.domain.model.commands.DeleteProfileComman
 import com.ezpark.web_service.profiles.domain.model.commands.UpdateProfileCommand;
 import com.ezpark.web_service.profiles.domain.model.exceptions.*;
 import com.ezpark.web_service.profiles.domain.services.ProfileCommandService;
-import com.ezpark.web_service.profiles.infrastructure.repositories.jpa.ProfileRepository;
+import com.ezpark.web_service.profiles.infrastructure.persistence.jpa.repositories.ProfileRepository;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 

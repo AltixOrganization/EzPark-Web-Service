@@ -30,8 +30,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
   public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
     Long userIdLong = Long.valueOf(userId);
     var user = userRepository.findById(userIdLong)
-            .orElseThrow(
-                    () -> new UsernameNotFoundException("User not found with username: " + userId));
+        .orElseThrow(
+            () -> new UsernameNotFoundException("User not found with username: " + userId));
     return UserDetailsImpl.build(user);
   }
 }

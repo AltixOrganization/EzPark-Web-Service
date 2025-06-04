@@ -5,6 +5,7 @@ import com.ezpark.web_service.vehicles.domain.model.aggregates.Vehicle;
 import com.ezpark.web_service.vehicles.domain.model.commands.CreateVehicleCommand;
 import com.ezpark.web_service.vehicles.domain.model.commands.DeleteVehicleCommand;
 import com.ezpark.web_service.vehicles.domain.model.commands.UpdateVehicleCommand;
+import com.ezpark.web_service.vehicles.domain.model.exceptions.*;
 import com.ezpark.web_service.vehicles.domain.services.VehicleCommandService;
 import com.ezpark.web_service.vehicles.infrastructure.persistence.jpa.repositories.VehicleRepository;
 import org.springframework.stereotype.Service;
@@ -25,10 +26,10 @@ public class VehicleCommandServiceImpl implements VehicleCommandService {
     @Override
     public Optional<Vehicle> handle(CreateVehicleCommand command) {
         if (!externalProfileService.checkProfileExistById(command.profileId())) {
-            throw new IllegalArgumentException("User not found");
+            throw new ProfileNotFoundException();
         }
         if (vehicleRepository.existsByLicensePlate(command.licensePlate())) {
-            throw new IllegalArgumentException("A vehicle with the license plate " + command.licensePlate() + " already exists.");
+            throw new VehicleLicensePlateConflictException();
         }
         Vehicle vehicle = new Vehicle(command);
         var response = vehicleRepository.save(vehicle);
@@ -39,19 +40,19 @@ public class VehicleCommandServiceImpl implements VehicleCommandService {
     public Optional<Vehicle> handle(UpdateVehicleCommand command) {
         var result = vehicleRepository.findById(command.vehicleId());
         if (result.isEmpty())
-            throw new IllegalArgumentException("Vehicle does not exist");
+            throw new VehicleNotFoundException();
         var vehicleToUpdate = result.get();
         try{
             var updatedVehicle= vehicleRepository.save(vehicleToUpdate.updatedVehicle(command));
             return Optional.of(updatedVehicle);
         }catch (Exception e){
-            throw new IllegalArgumentException("Error while updating vehicle: " + e.getMessage());
+            throw new VehicleUpdateException();
         }
     }
 
     @Override
     public void handle(DeleteVehicleCommand command){
-        if (!vehicleRepository.existsById(command.vehicleId())) throw new IllegalArgumentException("Vehicle does not exist");
+        if (!vehicleRepository.existsById(command.vehicleId())) throw new VehicleNotFoundException();
         vehicleRepository.deleteById(command.vehicleId());
         System.out.println("Vehicle Delete");
     }

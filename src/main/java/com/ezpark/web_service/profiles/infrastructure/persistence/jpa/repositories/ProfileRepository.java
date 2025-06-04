@@ -1,4 +1,4 @@
-package com.ezpark.web_service.profiles.infrastructure.repositories.jpa;
+package com.ezpark.web_service.profiles.infrastructure.persistence.jpa.repositories;
 
 
 import com.ezpark.web_service.profiles.domain.model.aggregates.Profile;
