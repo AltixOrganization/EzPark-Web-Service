@@ -1,7 +1,9 @@
 package com.ezpark.web_service.parkings.interfaces.rest;
 
+import com.ezpark.web_service.parkings.domain.model.commands.DeleteScheduleCommand;
 import com.ezpark.web_service.parkings.domain.model.queries.GetAllScheduleQuery;
 import com.ezpark.web_service.parkings.domain.model.queries.GetScheduleByIdQuery;
+import com.ezpark.web_service.parkings.domain.services.ParkingCommandService;
 import com.ezpark.web_service.parkings.domain.services.ScheduleCommandService;
 import com.ezpark.web_service.parkings.domain.services.ScheduleQueryService;
 import com.ezpark.web_service.parkings.interfaces.rest.resources.CreateScheduleResource;
@@ -23,10 +25,12 @@ import java.util.List;
 public class ScheduleController {
     private final ScheduleCommandService scheduleCommandService;
     private final ScheduleQueryService scheduleQueryService;
+    private final ParkingCommandService parkingCommandService;
 
-    public ScheduleController(ScheduleCommandService scheduleCommandService, ScheduleQueryService scheduleQueryService) {
+    public ScheduleController(ScheduleCommandService scheduleCommandService, ScheduleQueryService scheduleQueryService, ParkingCommandService parkingCommandService) {
         this.scheduleCommandService = scheduleCommandService;
         this.scheduleQueryService = scheduleQueryService;
+        this.parkingCommandService = parkingCommandService;
     }
 
     @PutMapping("/{id}")
@@ -60,5 +64,12 @@ public class ScheduleController {
         return schedule.map(ScheduleResourceFromEntityAssembler::toResourceFromEntity)
                 .map(resource -> new ResponseEntity<>(resource, HttpStatus.OK))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deleteSchedule(@PathVariable Long id) {
+        var deleteScheduleCommand = new DeleteScheduleCommand(id);
+        scheduleCommandService.handle(deleteScheduleCommand);
+        return ResponseEntity.noContent().build();
     }
 }

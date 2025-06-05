@@ -1,6 +1,7 @@
 package com.ezpark.web_service.parkings.application.internal.commandservices;
 
 import com.ezpark.web_service.parkings.domain.model.commands.CreateScheduleCommand;
+import com.ezpark.web_service.parkings.domain.model.commands.DeleteScheduleCommand;
 import com.ezpark.web_service.parkings.domain.model.commands.MarkScheduleAsUnavailable;
 import com.ezpark.web_service.parkings.domain.model.commands.UpdateScheduleCommand;
 import com.ezpark.web_service.parkings.domain.model.entities.Schedule;
@@ -66,5 +67,10 @@ public class ScheduleCommandServiceImpl implements ScheduleCommandService {
         var schedule = scheduleOptional.get();
         schedule.setIsAvailable(false);
         return Optional.of(scheduleRepository.save(schedule));
+    }
+
+    @Override
+    public void handle(DeleteScheduleCommand command) {
+        scheduleRepository.deleteById(command.scheduleId());
     }
 }
