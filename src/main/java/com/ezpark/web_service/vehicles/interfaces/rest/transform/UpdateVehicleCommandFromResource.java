@@ -5,6 +5,10 @@ import com.ezpark.web_service.vehicles.interfaces.rest.resources.UpdateVehicleRe
 
 public class UpdateVehicleCommandFromResource {
     public static UpdateVehicleCommand toCommandFromResource(Long vehicleId, UpdateVehicleResource resource) {
-        return new UpdateVehicleCommand(vehicleId, resource.licensePlate(), resource.model(), resource.brand());
+        return new UpdateVehicleCommand(
+                vehicleId,
+                resource.licensePlate(),
+                resource.modelId()
+        );
     }
 }

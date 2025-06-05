@@ -7,8 +7,7 @@ public class CreateVehicleCommandFromResourceAssembler {
     public static CreateVehicleCommand toCommandFromResource(CreateVehicleResource resource) {
         return new CreateVehicleCommand(
                 resource.licensePlate(),
-                resource.model(),
-                resource.brand(),
+                resource.modelId(),
                 resource.profileId()
         );
     }

@@ -9,8 +9,7 @@ public class VehicleResourceFromEntityAssembler {
         return new VehicleResource(
                 entity.getId(),
                 entity.getLicensePlate(),
-                entity.getBrand(),
-                entity.getModel(),
+                BrandResourceFromEntityAssembler.toResourceFromModel(entity.getModel()),
                 entity.getProfileId().profileId().toString(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt()

@@ -12,5 +12,4 @@ public interface VehicleQueryService {
     Optional<Vehicle> handle(GetVehicleByIdQuery query);
     List<Vehicle> handle(GetAllVehiclesQuery query);
     List<Vehicle> handle(GetVehiclesByProfileIdQuery query);
-
 }

@@ -6,8 +6,7 @@ import java.time.LocalDateTime;
 public record VehicleResource(
         Long id,
         String licensePlate,
-        String model,
-        String brand,
+        BrandWithModelResource brand,
         String profileId,
         LocalDateTime createdAt,
         LocalDateTime updatedAt

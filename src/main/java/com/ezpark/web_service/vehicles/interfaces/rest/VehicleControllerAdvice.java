@@ -57,6 +57,26 @@ public class VehicleControllerAdvice {
         return response;
     }
 
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(BrandNotFoundException.class)
+    public ErrorResource handleBrandNotFoundException() {
+        ErrorResource response = new ErrorResource();
+        response.setCode(BRAND_NOT_FOUND.getCode());
+        response.setMessage(BRAND_NOT_FOUND.getMessage());
+        response.setTimeStamp(LocalDateTime.now());
+        return response;
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(ModelNotFoundException.class)
+    public ErrorResource handleModelNotFoundException() {
+        ErrorResource response = new ErrorResource();
+        response.setCode(MODEL_NOT_FOUND.getCode());
+        response.setMessage(MODEL_NOT_FOUND.getMessage());
+        response.setTimeStamp(LocalDateTime.now());
+        return response;
+    }
+
     // invalid JSON
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(HttpMessageNotReadableException.class)
