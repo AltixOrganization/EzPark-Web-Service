@@ -1,6 +1,6 @@
 package com.ezpark.web_service.iam.application.internal.outboundservices.acl;
 
-import com.ezpark.web_service.profiles.interfaces.acl.ProfileContextFacade;
+import com.ezpark.web_service.parkings.application.internal.outboundservices.acl.ProfileContextFacade;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;

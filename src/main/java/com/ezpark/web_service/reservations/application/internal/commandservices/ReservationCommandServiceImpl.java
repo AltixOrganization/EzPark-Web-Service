@@ -1,8 +1,8 @@
 package com.ezpark.web_service.reservations.application.internal.commandservices;
 
-import com.ezpark.web_service.reservations.application.internal.outboundservices.acl.ExternalProfileService;
 import com.ezpark.web_service.reservations.application.internal.outboundservices.acl.ExternalScheduleService;
 import com.ezpark.web_service.reservations.application.internal.outboundservices.acl.ParkingContextFacade;
+import com.ezpark.web_service.reservations.application.internal.outboundservices.acl.ProfileContextFacade;
 import com.ezpark.web_service.reservations.application.internal.outboundservices.acl.VehiclesContextFacade;
 import com.ezpark.web_service.reservations.domain.model.aggregates.Reservation;
 import com.ezpark.web_service.reservations.domain.model.commands.CreateReservationCommand;
@@ -24,7 +24,7 @@ import java.util.Optional;
 @Service
 public class ReservationCommandServiceImpl implements ReservationCommandService {
     private final ReservationRepository reservationRepository;
-    private final ExternalProfileService externalProfileService;
+    private final ProfileContextFacade profileFacade;
     private final VehiclesContextFacade vehiclesContextFacade;
     private final ParkingContextFacade parkingContextFacade;
     private final ExternalScheduleService externalScheduleService;
@@ -33,7 +33,7 @@ public class ReservationCommandServiceImpl implements ReservationCommandService 
     @Override
     public Optional<Reservation> handle(CreateReservationCommand command) {
         try {
-            if (!externalProfileService.checkProfileExistById(command.guestId()) || !externalProfileService.checkProfileExistById(command.hostId())) {
+            if (!profileFacade.checkProfileExistById(command.guestId()) || !profileFacade.checkProfileExistById(command.hostId())) {
                 throw new ProfileNotFoundException();
             }
             if (!vehiclesContextFacade.checkVehicleExistsById(command.vehicleId())) {

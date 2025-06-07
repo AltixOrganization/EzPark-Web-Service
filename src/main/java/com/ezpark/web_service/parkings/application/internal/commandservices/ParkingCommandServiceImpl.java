@@ -1,6 +1,7 @@
 package com.ezpark.web_service.parkings.application.internal.commandservices;
 
-import com.ezpark.web_service.parkings.application.internal.outboundservices.acl.ExternalProfileService;
+import com.ezpark.web_service.parkings.application.internal.outboundservices.acl.KafkaProfileContextFacade;
+import com.ezpark.web_service.parkings.application.internal.outboundservices.acl.ProfileContextFacade;
 import com.ezpark.web_service.parkings.domain.model.aggregates.Parking;
 import com.ezpark.web_service.parkings.domain.model.commands.CreateParkingCommand;
 import com.ezpark.web_service.parkings.domain.model.commands.DeleteParkingCommand;
@@ -8,27 +9,26 @@ import com.ezpark.web_service.parkings.domain.model.commands.UpdateParkingComman
 import com.ezpark.web_service.parkings.domain.model.exceptions.*;
 import com.ezpark.web_service.parkings.domain.services.ParkingCommandService;
 import com.ezpark.web_service.parkings.infrastructure.persistence.jpa.repositories.ParkingRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@AllArgsConstructor
 @Service
 public class ParkingCommandServiceImpl implements ParkingCommandService {
-    private final ParkingRepository parkingRepository;
-    private final ExternalProfileService externalProfileService;
 
-    public ParkingCommandServiceImpl(ParkingRepository parkingRepository, ExternalProfileService externalProfileService) {
-        this.parkingRepository = parkingRepository;
-        this.externalProfileService = externalProfileService;
-    }
+    private final ParkingRepository parkingRepository;
+    private final ProfileContextFacade profileContextFacade ;
 
     @Override
     public Optional<Parking> handle(CreateParkingCommand command) {
-        if (!externalProfileService.checkProfileExistById(command.profileId())) {
-            throw new ProfileNotFoundException();
-        }
-        var parking = new Parking(command);
         try {
+            if (!profileContextFacade.checkProfileExistById(command.profileId())) {
+                throw new ProfileNotFoundException();
+            }
+            var parking = new Parking(command);
+
             var response = parkingRepository.save(parking);
             return Optional.of(response);
         } catch (Exception e) {
