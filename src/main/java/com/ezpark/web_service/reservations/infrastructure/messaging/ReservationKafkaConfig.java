@@ -14,6 +14,9 @@ public class ReservationKafkaConfig {
     public static final String TOPIC_RESERVATION_CREATED = "reservations.created";
     public static final String TOPIC_RESERVATION_CANCELED = "reservations.canceled";
 
+    public static final String TOPIC_RESERVATION_COMMANDS_REQUEST = "reservations.commands.request";
+    public static final String TOPIC_RESERVATION_COMMANDS_RESPONSE = "reservations.commands.response";
+
     @Bean
     public NewTopic reservationValidationRequestTopic() {
         return TopicBuilder.name(TOPIC_RESERVATION_VALIDATION_REQUEST)
@@ -41,6 +44,22 @@ public class ReservationKafkaConfig {
     @Bean
     public NewTopic reservationsCanceledTopic() {
         return TopicBuilder.name(TOPIC_RESERVATION_CANCELED)
+                .partitions(3)
+                .replicas(1)
+                .build();
+    }
+
+    @Bean
+    public NewTopic reservationCommandsRequestTopic() {
+        return TopicBuilder.name(TOPIC_RESERVATION_COMMANDS_REQUEST)
+                .partitions(3)
+                .replicas(1)
+                .build();
+    }
+
+    @Bean
+    public NewTopic reservationCommandsResponseTopic() {
+        return TopicBuilder.name(TOPIC_RESERVATION_COMMANDS_RESPONSE)
                 .partitions(3)
                 .replicas(1)
                 .build();

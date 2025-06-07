@@ -1,6 +1,7 @@
 package com.ezpark.web_service.payments.interfaces.rest;
 
 
+import com.ezpark.web_service.payments.domain.model.exceptions.ExternalServiceCommunicationException;
 import com.ezpark.web_service.payments.domain.model.exceptions.ReservationApprovalException;
 import com.ezpark.web_service.payments.domain.model.exceptions.ReservationNotFoundException;
 import com.ezpark.web_service.shared.interfaces.rest.resources.ErrorResource;
@@ -35,6 +36,16 @@ public class PaymentControllerAdvice {
         ErrorResource response = new ErrorResource();
         response.setCode(RESERVATION_APPROVAL_ERROR.getCode());
         response.setMessage(RESERVATION_APPROVAL_ERROR.getMessage());
+        response.setTimeStamp(LocalDateTime.now());
+        return response;
+    }
+
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    @ExceptionHandler(ExternalServiceCommunicationException.class)
+    public ErrorResource handleExternalServiceCommunicationException(ExternalServiceCommunicationException exception) {
+        ErrorResource response = new ErrorResource();
+        response.setCode(EXTERNAL_SERVICE_UNAVAILABLE.getCode());
+        response.setMessage(EXTERNAL_SERVICE_UNAVAILABLE.getMessage());
         response.setTimeStamp(LocalDateTime.now());
         return response;
     }
