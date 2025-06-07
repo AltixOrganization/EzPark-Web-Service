@@ -27,13 +27,15 @@ public class Vehicle extends AuditableAbstractAggregateRoot<Vehicle> {
     @Embedded
     private ProfileId profileId;
 
-    public Vehicle(CreateVehicleCommand command) {
+    public Vehicle(CreateVehicleCommand command, Model model) {
         this.licensePlate = command.licensePlate();
         this.profileId = new ProfileId(command.profileId());
+        this.model = model;
     }
 
-    public Vehicle updatedVehicle(UpdateVehicleCommand command) {
+    public Vehicle updatedVehicle(UpdateVehicleCommand command, Model model) {
         this.licensePlate = command.licensePlate();
+        this.model = model;
         return this;
     }
 }
