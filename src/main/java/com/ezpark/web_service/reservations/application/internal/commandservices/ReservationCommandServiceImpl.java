@@ -1,8 +1,8 @@
 package com.ezpark.web_service.reservations.application.internal.commandservices;
 
-import com.ezpark.web_service.reservations.application.internal.outboundservices.acl.ExternalParkingService;
 import com.ezpark.web_service.reservations.application.internal.outboundservices.acl.ExternalProfileService;
 import com.ezpark.web_service.reservations.application.internal.outboundservices.acl.ExternalScheduleService;
+import com.ezpark.web_service.reservations.application.internal.outboundservices.acl.ParkingContextFacade;
 import com.ezpark.web_service.reservations.application.internal.outboundservices.acl.VehiclesContextFacade;
 import com.ezpark.web_service.reservations.domain.model.aggregates.Reservation;
 import com.ezpark.web_service.reservations.domain.model.commands.CreateReservationCommand;
@@ -26,7 +26,7 @@ public class ReservationCommandServiceImpl implements ReservationCommandService 
     private final ReservationRepository reservationRepository;
     private final ExternalProfileService externalProfileService;
     private final VehiclesContextFacade vehiclesContextFacade;
-    private final ExternalParkingService externalParkingService;
+    private final ParkingContextFacade parkingContextFacade;
     private final ExternalScheduleService externalScheduleService;
 
     @Transactional
@@ -39,7 +39,7 @@ public class ReservationCommandServiceImpl implements ReservationCommandService 
             if (!vehiclesContextFacade.checkVehicleExistsById(command.vehicleId())) {
                 throw new VehicleNotFoundException();
             }
-            if (!externalParkingService.checkParkingExistById(command.parkingId())) {
+            if (!parkingContextFacade.checkParkingExistById(command.parkingId())) {
                 throw new ParkingNotFoundException();
             }
             if (!externalScheduleService.isScheduleAvailable(command.scheduleId())) {
