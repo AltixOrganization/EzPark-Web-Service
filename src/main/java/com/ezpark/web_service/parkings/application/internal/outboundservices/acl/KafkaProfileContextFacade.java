@@ -26,10 +26,10 @@ public class KafkaProfileContextFacade implements ProfileContextFacade {
     private final ResponseRegistry responseRegistry;
 
     @Override
-    public boolean checkProfileExistById(Long userId) throws Exception {
+    public boolean checkProfileExistById(Long profileId) throws Exception {
         String correlationId = UUID.randomUUID().toString();
 
-        ProfileValidationRequest request = new ProfileValidationRequest(correlationId, userId);
+        ProfileValidationRequest request = new ProfileValidationRequest(correlationId, profileId);
 
         try {
             log.info("Enviando solicitud de validación para perfil {} con correlationId {}",
@@ -46,12 +46,12 @@ public class KafkaProfileContextFacade implements ProfileContextFacade {
 
         } catch (TimeoutException e) {
             log.error("Timeout esperando la respuesta de validación para el perfil {} (correlationId {})",
-                    userId, correlationId, e);
+                    profileId, correlationId, e);
             throw new Exception("Timeout al validar el perfil. El servicio de perfiles podría no estar disponible.", e);
 
         } catch (Exception e) {
             log.error("Error inesperado durante la validación del perfil {} (correlationId {})",
-                    userId, correlationId, e);
+                    profileId, correlationId, e);
             throw new Exception("Error inesperado al comunicarse con el servicio de perfiles.", e);
         }
     }

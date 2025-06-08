@@ -97,19 +97,31 @@ public class ParkingKafkaListener {
                 response.correlationId(), response.success(), response.message());
     }
 
-    @KafkaListener(topics = ParkingKafkaConfig.TOPIC_PARKING_QUERIES_REQUEST, groupId = "parking-queries-group")
+    @KafkaListener(
+            topics = ParkingKafkaConfig.TOPIC_PARKING_QUERIES_REQUEST,
+            groupId = "${parkings.kafka.consumer.queries-group-id:parking-queries-group}"
+    )
     public void handleParkingQueries(ParkingQueryRequest request) {
-        if (request.queryType() == ParkingQueryType.IS_SCHEDULE_AVAILABLE) {
-            // Llama a un ScheduleQueryService
-            var getScheduleById = new GetScheduleByIdQuery(request.entityId());
-
-            boolean isAvailable = scheduleQueryService.handle(getScheduleById)
-                    .map(Schedule::getIsAvailable)
-                    .orElse(false);
-
-            // Publica un ParkingQueryResponse
-            eventPublisher.publish(ParkingKafkaConfig.TOPIC_PARKING_QUERIES_RESPONSE,
-                    new ParkingQueryResponse(request.correlationId(), isAvailable, ""));
+        boolean result = false;
+        String message = "";
+        try {
+            if (request.queryType() == ParkingQueryType.IS_SCHEDULE_AVAILABLE) {
+                var getScheduleById = new GetScheduleByIdQuery(request.entityId());
+                result = scheduleQueryService.handle(getScheduleById)
+                        .map(Schedule::getIsAvailable)
+                        .orElse(false);
+                message = "Consulta de disponibilidad de horario procesada.";
+            } else {
+                message = "Tipo de consulta no soportado.";
+            }
+        } catch (Exception e) {
+            result = false;
+            message = "Error interno al procesar la consulta.";
+            log.error("[Query] Error inesperado procesando consulta con correlationId {}: {}",
+                    request.correlationId(), e.getMessage(), e);
         }
+
+        ParkingQueryResponse response = new ParkingQueryResponse(request.correlationId(), result, message);
+        eventPublisher.publish(ParkingKafkaConfig.TOPIC_PARKING_QUERIES_RESPONSE, response);
     }
 }

@@ -4,8 +4,11 @@ import com.ezpark.web_service.payments.application.internal.outboundservices.acl
 import com.ezpark.web_service.payments.domain.model.aggregates.Payment;
 import com.ezpark.web_service.payments.domain.model.commands.CreatePaymentCommand;
 import com.ezpark.web_service.payments.domain.model.exceptions.ExternalServiceCommunicationException;
+import com.ezpark.web_service.payments.domain.model.exceptions.PaymentAlreadyExistsException;
 import com.ezpark.web_service.payments.domain.model.exceptions.ReservationApprovalException;
 import com.ezpark.web_service.payments.domain.model.exceptions.ReservationNotFoundException;
+import com.ezpark.web_service.payments.domain.model.valueobject.PaymentStatus;
+import com.ezpark.web_service.payments.domain.model.valueobject.ReservationId;
 import com.ezpark.web_service.payments.domain.service.PaymentCommandService;
 import com.ezpark.web_service.payments.infrastructure.persistence.jpa.repositories.PaymentRepository;
 import lombok.AllArgsConstructor;
@@ -13,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+
+import static com.ezpark.web_service.payments.domain.model.valueobject.PaymentStatus.*;
 
 @AllArgsConstructor
 @Service
@@ -23,13 +28,22 @@ public class PaymentCommandServiceImpl implements PaymentCommandService {
     @Transactional
     @Override
     public Optional<Payment> handle(CreatePaymentCommand command) {
+        var reservationId = new ReservationId(command.reservationId());
+        var paymentOptional = paymentRepository.findByReservationId(reservationId);
+        if (paymentOptional.isPresent()) {
+            throw new PaymentAlreadyExistsException();
+        }
         try {
-            kafkaReservationContextFacade.approveReservation(command.reservationId());
+            switch (PaymentStatus.valueOf(command.status())) {
+                case PENDING, FAILED -> throw new IllegalArgumentException("La reserva no existe o no está disponible para el pago.");
+                case COMPLETED -> {
+                    kafkaReservationContextFacade.approveReservation(command.reservationId());
+                }
+                default -> throw new IllegalArgumentException("Estado de pago desconocido: " + command.status());
+            }
 
         } catch (ReservationApprovalException e) {
-            // 2. Manejar fallos de NEGOCIO: La reserva existe pero no se pudo aprobar.
-            // Simplemente relanzamos la excepción para que una capa superior (ej. un ControllerAdvice)
-            // la capture y devuelva una respuesta HTTP apropiada (ej. 400 o 409).
+
             throw e;
 
         } catch (Exception e) {

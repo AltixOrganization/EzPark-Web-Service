@@ -1,20 +1,22 @@
 package com.ezpark.web_service.iam.application.internal.commandservices;
 
-import com.ezpark.web_service.iam.application.internal.outboundservices.acl.ExternalProfileService;
+import com.ezpark.web_service.iam.application.dtos.UserSignedUpEvent;
 import com.ezpark.web_service.iam.application.internal.outboundservices.hashing.HashingService;
 import com.ezpark.web_service.iam.application.internal.outboundservices.tokens.TokenService;
 import com.ezpark.web_service.iam.domain.model.aggregates.User;
 import com.ezpark.web_service.iam.domain.model.commands.SignInCommand;
 import com.ezpark.web_service.iam.domain.model.commands.SignUpCommand;
-import com.ezpark.web_service.iam.domain.model.exceptions.*;
 import com.ezpark.web_service.iam.domain.model.exceptions.EmailAlreadyExistsException;
 import com.ezpark.web_service.iam.domain.model.exceptions.InvalidCredentialsException;
 import com.ezpark.web_service.iam.domain.model.exceptions.RoleNotFoundException;
 import com.ezpark.web_service.iam.domain.model.valueobjects.Roles;
 import com.ezpark.web_service.iam.domain.services.UserCommandService;
+import com.ezpark.web_service.iam.infrastructure.messaging.IamKafkaConfig;
 import com.ezpark.web_service.iam.infrastructure.persistence.jpa.repositories.RoleRepository;
 import com.ezpark.web_service.iam.infrastructure.persistence.jpa.repositories.UserRepository;
 import com.ezpark.web_service.profiles.domain.model.exceptions.UserNotFoundException;
+import com.ezpark.web_service.shared.infrastructure.messaging.KafkaEventPublisher;
+import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +32,7 @@ import java.util.List;
  *     {@link SignInCommand} and {@link SignUpCommand} commands.
  * </p>
  */
+@AllArgsConstructor
 @Service
 public class UserCommandServiceImpl implements UserCommandService {
 
@@ -38,17 +41,8 @@ public class UserCommandServiceImpl implements UserCommandService {
   private final TokenService tokenService;
 
   private final RoleRepository roleRepository;
-  private final ExternalProfileService externalProfileService;
+  private final KafkaEventPublisher kafkaEventPublisher;
 
-  public UserCommandServiceImpl(UserRepository userRepository, HashingService hashingService,
-                                TokenService tokenService, RoleRepository roleRepository, ExternalProfileService externalProfileService) {
-
-    this.userRepository = userRepository;
-    this.hashingService = hashingService;
-    this.tokenService = tokenService;
-    this.roleRepository = roleRepository;
-    this.externalProfileService = externalProfileService;
-  }
 
   /**
    * Handle the sign-in command
@@ -59,6 +53,7 @@ public class UserCommandServiceImpl implements UserCommandService {
    * @return and optional containing the user matching the username and the generated token
    * @throws RuntimeException if the user is not found or the password is invalid
    */
+  @Transactional
   @Override
   public Optional<ImmutablePair<User, String>> handle(SignInCommand command) {
     var user = userRepository.findByEmail(command.email());
@@ -95,7 +90,14 @@ public class UserCommandServiceImpl implements UserCommandService {
     }
     var user = new User(command.email(), hashingService.encode(command.password()), roles);
     var savedUser = userRepository.save(user);
-    externalProfileService.createProfile(savedUser.getId(), command.firstName(), command.lastName(), command.birthDate());
+    var event = new UserSignedUpEvent(
+            user.getId(),
+            command.firstName(),
+            command.lastName(),
+            command.birthDate(),
+            command.email()
+    );
+    kafkaEventPublisher.publish(IamKafkaConfig.TOPIC_USER_SIGNED_UP, event);
     return userRepository.findByEmail(command.email());
   }
 }

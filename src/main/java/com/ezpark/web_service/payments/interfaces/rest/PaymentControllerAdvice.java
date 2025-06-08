@@ -2,6 +2,7 @@ package com.ezpark.web_service.payments.interfaces.rest;
 
 
 import com.ezpark.web_service.payments.domain.model.exceptions.ExternalServiceCommunicationException;
+import com.ezpark.web_service.payments.domain.model.exceptions.PaymentAlreadyExistsException;
 import com.ezpark.web_service.payments.domain.model.exceptions.ReservationApprovalException;
 import com.ezpark.web_service.payments.domain.model.exceptions.ReservationNotFoundException;
 import com.ezpark.web_service.shared.interfaces.rest.resources.ErrorResource;
@@ -46,6 +47,16 @@ public class PaymentControllerAdvice {
         ErrorResource response = new ErrorResource();
         response.setCode(EXTERNAL_SERVICE_UNAVAILABLE.getCode());
         response.setMessage(EXTERNAL_SERVICE_UNAVAILABLE.getMessage());
+        response.setTimeStamp(LocalDateTime.now());
+        return response;
+    }
+
+    @ExceptionHandler(PaymentAlreadyExistsException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResource handlePaymentAlreadyExistsException() {
+        ErrorResource response = new ErrorResource();
+        response.setCode(PAYMENT_ALREADY_EXISTS.getCode());
+        response.setMessage(PAYMENT_ALREADY_EXISTS.getMessage());
         response.setTimeStamp(LocalDateTime.now());
         return response;
     }
