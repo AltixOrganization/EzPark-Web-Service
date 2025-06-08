@@ -19,7 +19,7 @@ import java.util.Optional;
 public class ParkingCommandServiceImpl implements ParkingCommandService {
 
     private final ParkingRepository parkingRepository;
-    private final ProfileContextFacade profileContextFacade ;
+    private final ProfileContextFacade profileContextFacade;
 
     @Override
     public Optional<Parking> handle(CreateParkingCommand command) {

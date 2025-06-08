@@ -1,6 +1,6 @@
 package com.ezpark.web_service.vehicles.application.internal.commandservices;
 
-import com.ezpark.web_service.vehicles.application.internal.outboundservices.acl.ExternalProfileService;
+import com.ezpark.web_service.parkings.application.internal.outboundservices.acl.ProfileContextFacade;
 import com.ezpark.web_service.vehicles.domain.model.aggregates.Vehicle;
 import com.ezpark.web_service.vehicles.domain.model.commands.CreateVehicleCommand;
 import com.ezpark.web_service.vehicles.domain.model.commands.DeleteVehicleCommand;
@@ -20,13 +20,13 @@ import java.util.Optional;
 public class VehicleCommandServiceImpl implements VehicleCommandService {
 
     private final VehicleRepository vehicleRepository;
-    private final ExternalProfileService externalProfileService;
+    private final ProfileContextFacade profileContextFacade;
     private final ModelRepository modelRepository;
 
 
     @Override
-    public Optional<Vehicle> handle(CreateVehicleCommand command) {
-        if (!externalProfileService.checkProfileExistById(command.profileId())) {
+    public Optional<Vehicle> handle(CreateVehicleCommand command) throws Exception {
+        if (!profileContextFacade.checkProfileExistById(command.profileId())) {
             throw new ProfileNotFoundException();
         }
         if (vehicleRepository.existsByLicensePlate(command.licensePlate())) {

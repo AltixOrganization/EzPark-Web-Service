@@ -8,7 +8,7 @@ import com.ezpark.web_service.vehicles.domain.model.commands.UpdateVehicleComman
 import java.util.Optional;
 
 public interface VehicleCommandService {
-    Optional<Vehicle> handle(CreateVehicleCommand command);
+    Optional<Vehicle> handle(CreateVehicleCommand command) throws Exception;
     Optional<Vehicle> handle(UpdateVehicleCommand command);
     void handle(DeleteVehicleCommand command);
 }
