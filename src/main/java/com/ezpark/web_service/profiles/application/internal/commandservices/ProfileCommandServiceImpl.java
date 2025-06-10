@@ -1,7 +1,6 @@
 package com.ezpark.web_service.profiles.application.internal.commandservices;
 
 
-import com.ezpark.web_service.profiles.application.internal.outboundservices.acl.ExternalUserService;
 import com.ezpark.web_service.profiles.domain.model.aggregates.Profile;
 import com.ezpark.web_service.profiles.domain.model.commands.CreateProfileCommand;
 import com.ezpark.web_service.profiles.domain.model.commands.DeleteProfileCommand;
@@ -9,29 +8,21 @@ import com.ezpark.web_service.profiles.domain.model.commands.UpdateProfileComman
 import com.ezpark.web_service.profiles.domain.model.exceptions.*;
 import com.ezpark.web_service.profiles.domain.services.ProfileCommandService;
 import com.ezpark.web_service.profiles.infrastructure.persistence.jpa.repositories.ProfileRepository;
-import org.springframework.context.annotation.Lazy;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@AllArgsConstructor
 @Service
 public class ProfileCommandServiceImpl implements ProfileCommandService {
 
     private final ProfileRepository profileRepository;
-    private final ExternalUserService externalUserService;
 
-    public ProfileCommandServiceImpl(ProfileRepository profileRepository, @Lazy ExternalUserService externalUserService) {
-        this.profileRepository = profileRepository;
-        this.externalUserService = externalUserService;
-    }
 
 
     @Override
     public Optional<Profile> handle(CreateProfileCommand command) {
-        if(!externalUserService.checkUserExistsByUserId(command.userId()))
-        {
-            throw new UserNotFoundException();
-        }
         Profile user = new Profile(command);
         try {
             var response = profileRepository.save(user);

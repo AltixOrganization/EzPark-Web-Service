@@ -30,5 +30,4 @@ public interface IamContextFacade {
    */
   String fetchEmailByUserId(Long userId);
 
-  Boolean checkProfileExistsByUserId(Long userId);
 }

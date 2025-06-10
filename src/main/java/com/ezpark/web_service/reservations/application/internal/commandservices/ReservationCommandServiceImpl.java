@@ -1,9 +1,9 @@
 package com.ezpark.web_service.reservations.application.internal.commandservices;
 
-import com.ezpark.web_service.reservations.application.internal.outboundservices.acl.ExternalParkingService;
-import com.ezpark.web_service.reservations.application.internal.outboundservices.acl.ExternalProfileService;
-import com.ezpark.web_service.reservations.application.internal.outboundservices.acl.ExternalScheduleService;
-import com.ezpark.web_service.reservations.application.internal.outboundservices.acl.ExternalVehicleService;
+import com.ezpark.web_service.reservations.application.internal.outboundservices.acl.ParkingContextFacade;
+import com.ezpark.web_service.reservations.application.internal.outboundservices.acl.ProfileContextFacade;
+import com.ezpark.web_service.reservations.application.internal.outboundservices.acl.ScheduleContextFacade;
+import com.ezpark.web_service.reservations.application.internal.outboundservices.acl.VehiclesContextFacade;
 import com.ezpark.web_service.reservations.domain.model.aggregates.Reservation;
 import com.ezpark.web_service.reservations.domain.model.commands.CreateReservationCommand;
 import com.ezpark.web_service.reservations.domain.model.commands.UpdateReservationCommand;
@@ -24,26 +24,32 @@ import java.util.Optional;
 @Service
 public class ReservationCommandServiceImpl implements ReservationCommandService {
     private final ReservationRepository reservationRepository;
-    private final ExternalProfileService externalProfileService;
-    private final ExternalVehicleService externalVehicleService;
-    private final ExternalParkingService externalParkingService;
-    private final ExternalScheduleService externalScheduleService;
+    private final ProfileContextFacade profileFacade;
+    private final VehiclesContextFacade vehiclesContextFacade;
+    private final ParkingContextFacade parkingContextFacade;
+    private final ScheduleContextFacade scheduleContextFacade;
 
     @Transactional
     @Override
     public Optional<Reservation> handle(CreateReservationCommand command) {
-        if (!externalProfileService.checkProfileExistById(command.guestId()) || !externalProfileService.checkProfileExistById(command.hostId())) {
-            throw new ProfileNotFoundException();
-        }
-        if (!externalVehicleService.checkVehicleExistById(command.vehicleId())) throw new VehicleNotFoundException();
-        if (!externalParkingService.checkParkingExistById(command.parkingId())) throw new ParkingNotFoundException();
-
-        if (!externalScheduleService.isScheduleAvailable(command.scheduleId())) {
-            throw new ScheduleConflictException();
+        try {
+            if (!profileFacade.checkProfileExistById(command.guestId()) || !profileFacade.checkProfileExistById(command.hostId())) {
+                throw new ProfileNotFoundException();
+            }
+            if (!vehiclesContextFacade.checkVehicleExistsById(command.vehicleId())) {
+                throw new VehicleNotFoundException();
+            }
+            if (!parkingContextFacade.checkParkingExistById(command.parkingId())) {
+                throw new ParkingNotFoundException();
+            }
+            if (!scheduleContextFacade.isScheduleAvailable(command.scheduleId())) {
+                throw new ScheduleConflictException();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Fallo al validar pre-condiciones con servicios externos.", e);
         }
 
         List<Status> blockedStatuses = List.of(Status.Approved, Status.InProgress, Status.Completed);
-
         if (reservationRepository.existsByOverlapWithStatus(
                 new ParkingId(command.parkingId()),
                 command.reservationDate(),
@@ -55,31 +61,35 @@ public class ReservationCommandServiceImpl implements ReservationCommandService 
 
         var reservation = new Reservation(command);
         reservation.setStatus(Status.Pending);
-        try {
-            var response = reservationRepository.save(reservation);
-            return Optional.of(response);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return Optional.empty();
-        }
+
+        var savedReservation = reservationRepository.save(reservation);
+        // Aquí podrías publicar un evento de dominio "ReservationCreatedEvent"
+        // kafkaEventPublisher.publish(..., new ReservationCreatedEvent(...));
+        return Optional.of(savedReservation);
     }
 
     @Transactional
     @Override
     public Optional<Reservation> handle(UpdateReservationCommand command) {
-        var result = reservationRepository.findById(command.reservationId());
-        if (result.isEmpty())
-            throw new ReservationNotFoundException();
-        Long currentScheduleId = result.get().getScheduleId().scheduleId();
-        if (!command.scheduleId().equals(currentScheduleId) &&
-                !externalScheduleService.isScheduleAvailable(command.scheduleId())) {
-            throw new ScheduleConflictException();
+        var reservationToUpdate = reservationRepository.findById(command.reservationId())
+                .orElseThrow(ReservationNotFoundException::new);
+
+        Long currentScheduleId = reservationToUpdate.getScheduleId().scheduleId();
+        if (!command.scheduleId().equals(currentScheduleId)) {
+            try {
+                if (!scheduleContextFacade.isScheduleAvailable(command.scheduleId())) {
+                    throw new ScheduleConflictException();
+                }
+            } catch (ExternalServiceCommunicationException e) {
+                throw new RuntimeException("Fallo al validar disponibilidad del nuevo horario: servicio externo no disponible.", e);
+            } catch (Exception e) {
+                throw new RuntimeException("Error inesperado al validar la disponibilidad del nuevo horario.", e);
+            }
         }
 
         List<Status> blockedStatuses = List.of(Status.Approved, Status.InProgress, Status.Completed);
-
         if (reservationRepository.existsByOverlapWithStatus(
-                new ParkingId(result.get().getParkingId().parkingId()),
+                new ParkingId(reservationToUpdate.getParkingId().parkingId()),
                 command.reservationDate(),
                 command.startTime(),
                 command.endTime(),
@@ -87,11 +97,12 @@ public class ReservationCommandServiceImpl implements ReservationCommandService 
             throw new ReservationOverlapException();
         }
 
-        var reservationToUpdate = result.get();
-        try{
-            var updatedReservation= reservationRepository.save(reservationToUpdate.updatedReservation(command));
+
+        try {
+            reservationToUpdate.updatedReservation(command);
+            var updatedReservation = reservationRepository.save(reservationToUpdate);
             return Optional.of(updatedReservation);
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new ReservationUpdateException();
         }
     }
@@ -105,12 +116,8 @@ public class ReservationCommandServiceImpl implements ReservationCommandService 
         var statusToUpdate = result.get();
         try {
             if (command.status() == Status.Approved) {
-                boolean updated = externalScheduleService.markScheduleAsUnavailable(
+                scheduleContextFacade.markScheduleAsUnavailable(
                         statusToUpdate.getScheduleId().scheduleId());
-
-                if (!updated) {
-                    throw new ScheduleUpdateException();
-                }
             }
             var updatedStatus = reservationRepository.save(statusToUpdate.updatedStatus(command));
             return Optional.of(updatedStatus);

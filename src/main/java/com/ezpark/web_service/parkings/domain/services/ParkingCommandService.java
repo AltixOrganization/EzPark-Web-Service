@@ -8,7 +8,7 @@ import com.ezpark.web_service.parkings.domain.model.commands.UpdateParkingComman
 import java.util.Optional;
 
 public interface ParkingCommandService {
-    Optional<Parking> handle(CreateParkingCommand command);
+    Optional<Parking> handle(CreateParkingCommand command) throws Exception;
     Optional<Parking> handle(UpdateParkingCommand command);
     void handle(DeleteParkingCommand command);
 }

@@ -55,7 +55,7 @@ public class VehicleController {
 
 
     @PostMapping("/create")
-    public ResponseEntity<VehicleResource> createVehicle(@Validated @RequestBody CreateVehicleResource resource) {
+    public ResponseEntity<VehicleResource> createVehicle(@Validated @RequestBody CreateVehicleResource resource) throws Exception {
         return vehicleCommandService.handle(CreateVehicleCommandFromResourceAssembler.toCommandFromResource(resource))
                 .map(VehicleResourceFromEntityAssembler::toResourceFromEntity)
                 .map(vehicle -> ResponseEntity.status(HttpStatus.CREATED).body(vehicle))

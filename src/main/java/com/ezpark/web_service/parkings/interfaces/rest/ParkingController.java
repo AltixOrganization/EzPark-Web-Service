@@ -48,7 +48,7 @@ public class ParkingController {
     }
 
     @PostMapping
-    public ResponseEntity<ParkingResource> createParking(@RequestBody CreateParkingResource createParkingResource) {
+    public ResponseEntity<ParkingResource> createParking(@RequestBody CreateParkingResource createParkingResource) throws Exception {
         var createParkingCommand = CreateParkingCommandFromResourceAssembler.toCommandFromResource(createParkingResource);
         var parking = parkingCommandService.handle(createParkingCommand);
 

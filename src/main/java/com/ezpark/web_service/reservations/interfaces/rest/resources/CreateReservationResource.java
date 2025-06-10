@@ -1,5 +1,6 @@
 package com.ezpark.web_service.reservations.interfaces.rest.resources;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -20,9 +21,11 @@ public record CreateReservationResource(
         LocalDate reservationDate,
 
         @NotNull(message = "{reservation.startTime.not.null}")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
         LocalTime startTime,
 
         @NotNull(message = "{reservation.endTime.not.null}")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
         LocalTime endTime,
 
         @NotNull(message = "{reservation.guestId.not.null}")
